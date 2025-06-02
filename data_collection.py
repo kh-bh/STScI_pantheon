@@ -1,23 +1,12 @@
-import sys,os,glob
-from astropy.io import fits
-from astropy.table import Table
-from astropy.nddata import extract_array
-from astropy.coordinates import SkyCoord
-from astropy import wcs
-from astropy.wcs.utils import skycoord_to_pixel
-from astropy import units as u
-import numpy as np
-import matplotlib.pyplot as plt
 from astroquery.mast import Observations
-from astropy.visualization import (simple_norm,LinearStretch)
 import pandas as pd
-import time
-import timeit
-
+import json
 
 def main():
 
     df = pd.read_csv('unmatched_pantheon.csv')
+    data_vp = {"valid_points": []}
+
 
     valid_points = []
     def record_index_SP1A(resolved_coord_index):
@@ -43,16 +32,28 @@ def main():
             data_products = data_products[data_products['productType'] == 'SCIENCE']
         except: 
             print("No Data Points :(")
+            valid_points.append(resolved_coord_index)
+            item = {"id": df['SNID'][resolved_coord_index], 
+                    "RA_Dec": df['resolved_coord'][resolved_coord_index],
+                    "valid": False}
+            data_vp["items"].append(item)
             exit
         else:
             print("Has Data Points!")
             valid_points.append(resolved_coord_index)
+            item = {"id": df['SNID'][resolved_coord_index], 
+                    "RA_Dec": df['resolved_coord'][resolved_coord_index],
+                    "valid": True}
+            data_vp["items"].append(item)
     
 
     for i in range(len(df['resolved_coord'])):
         record_index_SP1A(i)
         df_vp = pd.DataFrame(valid_points)
         df_vp.to_csv('valid_points_index_list.csv', index=False)
+    
+    with open("valid.json", "w") as outfile:
+        json.dump(data_vp, outfile, indent=4)
 
 if __name__== "__main__":
     main()
