@@ -31,12 +31,14 @@ def main():
         #try the the query, if a error is thrown then print "No Data Points" and "skip" this data point, else make folder and store data
         try:
             obs_table = Observations.query_criteria(coordinates=df['resolved_coord'][resolved_coord_index],
-                                                radius="0.006 deg",
-                                                intentType = 'science',
-                                                filters = ['F1*'],
-                                                obs_collection=['HST', 'JWST'])
+                                            radius="0.006 deg",
+                                            intentType = 'science',
+                                            filters = ['F1*'],
+                                            obs_collection=['HST'])
             obs_table = obs_table[obs_table['calib_level']==3]
             data_products = Observations.get_product_list(obs_table)
+            data_products = data_products[data_products['calib_level'] == 3]
+            data_products = data_products[data_products['productType'] == 'SCIENCE']
         except: 
             print("No Data Points :(")
             exit
