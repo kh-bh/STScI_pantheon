@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from astroquery.mast import Observations
 from astropy.visualization import (simple_norm,LinearStretch)
 import pandas as pd
+import time
+import timeit
 
 
 def main():
@@ -18,7 +20,7 @@ def main():
     df = pd.read_csv('unmatched_pantheon.csv')
 
     valid_points = []
-    def save_images_supernova(resolved_coord_index):
+    def record_index_SP1A(resolved_coord_index):
         """
         If there are images for the supernovae in JWST or HST at the resolved query, create a folder and keep the data there
         Parameters:
@@ -45,18 +47,12 @@ def main():
         else:
             print("Has Data Points!")
             valid_points.append(resolved_coord_index)
-            """
-            folder_path = "pantheon_data_folder/{}".format(df['resolved_coord'][resolved_coord_index])
-            os.makedirs(folder_path, exist_ok=True)
-            #Fits is what we need for space_phot, jpg to see image
-            manifest = Observations.download_products(data_products, download_dir=folder_path, extension=['fits'])
-            print(manifest)
-            """
     
+
     for i in range(len(df['resolved_coord'])):
-        save_images_supernova(i)
+        record_index_SP1A(i)
         df_vp = pd.DataFrame(valid_points)
         df_vp.to_csv('valid_points_index_list.csv', index=False)
 
-if __name__=="__main__":
+if __name__== "__main__":
     main()
