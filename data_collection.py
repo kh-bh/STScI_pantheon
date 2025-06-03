@@ -5,17 +5,15 @@ import json
 def main():
 
     df = pd.read_csv('unmatched_pantheon.csv')
-    data_vp = {"valid_points": []}
-
 
     valid_points = []
     def record_index_SP1A(resolved_coord_index):
         """
-        If there are images for the supernovae in JWST or HST at the resolved query, create a folder and keep the data there
+        If there are images for the supernovae in JWST or HST at the resolved query, create a file that stores the index point of the list
         Parameters:
             resolved_coord_index: integer, the index number of the query
         Returns:
-            Folder of Data at requested file path (pantheon_data_folder/{resolved coord})
+            An array with the index points of the list
         """
         print(resolved_coord_index, df['resolved_coord'][resolved_coord_index])
 
@@ -32,28 +30,17 @@ def main():
             data_products = data_products[data_products['productType'] == 'SCIENCE']
         except: 
             print("No Data Points :(")
-            valid_points.append(resolved_coord_index)
-            item = {"id": df['SNID'][resolved_coord_index], 
-                    "RA_Dec": df['resolved_coord'][resolved_coord_index],
-                    "valid": False}
-            data_vp["items"].append(item)
             exit
         else:
             print("Has Data Points!")
             valid_points.append(resolved_coord_index)
-            item = {"id": df['SNID'][resolved_coord_index], 
-                    "RA_Dec": df['resolved_coord'][resolved_coord_index],
-                    "valid": True}
-            data_vp["items"].append(item)
     
-
+    #Goes through each of the resolved coordinates and finds if there is data, then makes valid_points_index_list.csv
     for i in range(len(df['resolved_coord'])):
         record_index_SP1A(i)
         df_vp = pd.DataFrame(valid_points)
         df_vp.to_csv('valid_points_index_list.csv', index=False)
-    
-    with open("valid.json", "w") as outfile:
-        json.dump(data_vp, outfile, indent=4)
+
 
 if __name__== "__main__":
     main()
