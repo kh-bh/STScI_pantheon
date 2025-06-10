@@ -1,11 +1,9 @@
 from astroquery.mast import Observations
 import pandas as pd
-import json
 
 def main():
 
-    df = pd.read_csv('unmatched_pantheon.csv')
-
+    df = pd.read_csv('data_files/unmatched_pantheon.csv')
     valid_points = []
     def record_index_SP1A(resolved_coord_index):
         """
@@ -33,14 +31,19 @@ def main():
             exit
         else:
             print("Has Data Points!")
-            valid_points.append(resolved_coord_index)
+            info = {
+                        "SNID": df['SNID'][resolved_coord_index],
+                        "RA": df['RA'][resolved_coord_index],
+                        "Dec": df['Dec'][resolved_coord_index]
+                    }
+            valid_points.append(info)
     
     #Goes through each of the resolved coordinates and finds if there is data, then makes valid_points_index_list.csv
     for i in range(len(df['resolved_coord'])):
         record_index_SP1A(i)
-        df_vp = pd.DataFrame(valid_points)
-        df_vp.to_csv('valid_points_index_list.csv', index=False)
-
+        if (i%10 == 0):
+            df_vp = pd.DataFrame(valid_points)
+            df_vp.to_csv('valid_points_index_list.csv', index=False)
 
 if __name__== "__main__":
     main()
