@@ -1,19 +1,9 @@
-import sys,os,glob
-from astropy.io import fits
-from astropy.table import Table
-from astropy.nddata import extract_array
-from astropy.coordinates import SkyCoord
-from astropy import wcs
-from astropy.wcs.utils import skycoord_to_pixel
-from astropy import units as u
-import numpy as np
-import matplotlib.pyplot as plt
+import os
 from astroquery.mast import Observations
-from astropy.visualization import (simple_norm,LinearStretch)
 import pandas as pd
 
 def main():
-    df = pd.read_csv('HST.csv')
+    df = pd.read_csv('data_files/valid_points_list.csv')
     df_string = df.astype(str)
     df = df.assign(resolved_coord = df_string['RA'] + " " + df_string['Dec'])
 
