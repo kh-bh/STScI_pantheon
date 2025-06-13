@@ -33,7 +33,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
 
                     info = {
                         "SNID": snid,
-                        "filename": os.path.basename(file_path),
+                        "filename": file_path,
                         "Telescope": header.get("TELESCOP"),
                         "Instrument": header.get("INSTRUME"),
                         "Filter": header.get("FILTER"),
