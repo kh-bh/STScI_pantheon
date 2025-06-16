@@ -22,15 +22,18 @@ def source_extractor(source_extractor_path = ""):
 
 def catalog_creator(SNID, filename, filter, home_path, source_path = ""):
     if filter == 'detection':
-        exit
+        return;
+
+    base_file = os.path.basename(filename)
+    base, _ = os.path.splitext(base_file)
+
+    done = check_file_exist(home_path, source_path, SNID, base)
+    if done == True:
+        return;
 
     dest_path = home_path + "/" + filename
 
     exec_string = 'sex ' + dest_path + ' -c ' + 'default.sex'
-
-    base_file = os.path.basename(filename)
-
-    base, _ = os.path.splitext(base_file)
 
     cat_file_name = "test.cat"
     new_cat_file_name = f"{base}.cat"
@@ -43,6 +46,16 @@ def catalog_creator(SNID, filename, filter, home_path, source_path = ""):
     os.rename(cat_file_name, new_cat_file_name)
     os.rename(fits_file_name, new_fits_file_name)
     move_files_group(SNID, base, new_cat_file_name, new_fits_file_name, home_path, source_path)
+
+def check_file_exist(home_path, source_path, SNID, base):
+    """
+    Makes the process able to be stopped and started at your discretion
+    Returns:
+        Boolean value of if the file exists
+    """
+    return os.path.exists(f"{home_path}/{source_path}/{SNID}/{base}")
+    
+
         
 
 def move_files_group(SNid, base, cat_file_name, fits_file_name, home_path, source_path = ''):
@@ -76,7 +89,6 @@ def main():
 
     #Makes sure that each of the source extractor files are avaliable and found
     source_extractor()
-    
     for row in df.itertuples():
         catalog_creator(row.SNID, row.filename, row.Filter, home_dir, source_path= "source_extractor")
 
