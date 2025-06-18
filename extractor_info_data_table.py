@@ -33,7 +33,7 @@ def create_brightest_index(root_dir, relative_key, output_csv):
 
 
             SNID_key = nmFolders[-3]
-            file_key = nmFolders[-1]
+            file_key = nmFolders[-2]
             relative_key += 1
 
             info = {
