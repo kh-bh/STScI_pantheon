@@ -7,7 +7,7 @@ def main():
     valid_points = []
     def record_index_SP1A(resolved_coord_index):
         """
-        If there are images for the supernovae in JWST or HST at the resolved query, create a file that stores the index point of the list
+        If there are images for the supernovae in HST at the resolved query, create a file that stores the index point of the list
         Parameters:
             resolved_coord_index: integer, the index number of the query
         Returns:
@@ -43,7 +43,7 @@ def main():
         record_index_SP1A(i)
         if (i%10 == 0):
             df_vp = pd.DataFrame(valid_points)
-            df_vp.to_csv('valid_points_index_list.csv', index=False)
+            df_vp.to_csv('valid_points_index_list_HST.csv', index=False)
 
 if __name__== "__main__":
     main()
