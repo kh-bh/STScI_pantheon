@@ -1,23 +1,29 @@
+import os
 from astroquery.mast import Observations
 import pandas as pd
+import subprocess
 
 def main():
 
-    df = pd.read_csv('data_files/unmatched_pantheon.csv')
-    valid_points = []
-    def record_index_SP1A(resolved_coord_index):
+    subprocess.call("cd ..", shell = True)
+
+    df = pd.read_csv('data_files/valid_points_list.csv')
+    df_string = df.astype(str)
+    df = df.assign(resolved_coord = df_string['RA'] + " " + df_string['Dec'])
+
+    def save_images_supernova(resolved_coord, i):
         """
-        If there are images for the supernovae in HST at the resolved query, create a file that stores the index point of the list
+        If there are images for the supernovae in JWST or HST at the resolved query, create a folder and keep the data there
         Parameters:
             resolved_coord_index: integer, the index number of the query
         Returns:
-            An array with the index points of the list
+            Folder of Data at requested file path (pantheon_data_folder/{resolved coord})
         """
-        print(resolved_coord_index, df['resolved_coord'][resolved_coord_index])
+        print(resolved_coord)
 
         #try the the query, if a error is thrown then print "No Data Points" and "skip" this data point, else make folder and store data
         try:
-            obs_table = Observations.query_criteria(coordinates=df['resolved_coord'][resolved_coord_index],
+            obs_table = Observations.query_criteria(coordinates=resolved_coord,
                                             radius="0.006 deg",
                                             intentType = 'science',
                                             filters = ['F1*'],
@@ -31,19 +37,13 @@ def main():
             exit
         else:
             print("Has Data Points!")
-            info = {
-                        "SNID": df['SNID'][resolved_coord_index],
-                        "RA": df['RA'][resolved_coord_index],
-                        "Dec": df['Dec'][resolved_coord_index]
-                    }
-            valid_points.append(info)
+            folder_path = "pantheon_data_folder/{}".format(df['SNID'][i])
+            os.makedirs(folder_path, exist_ok=True)
+            manifest = Observations.download_products(data_products, download_dir=folder_path, extension=['fits'])
+            print(manifest)
     
-    #Goes through each of the resolved coordinates and finds if there is data, then makes valid_points_index_list.csv
     for i in range(len(df['resolved_coord'])):
-        record_index_SP1A(i)
-        if (i%10 == 0):
-            df_vp = pd.DataFrame(valid_points)
-            df_vp.to_csv('valid_points_index_list_HST.csv', index=False)
+        save_images_supernova(df['resolved_coord'][i], i)
 
-if __name__== "__main__":
+if __name__=="__main__":
     main()
