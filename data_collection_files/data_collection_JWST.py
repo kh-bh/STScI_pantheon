@@ -1,7 +1,10 @@
 from astroquery.mast import Observations
 import pandas as pd
+import subprocess
 
 def main():
+    
+    subprocess.call("cd ..", shell = True)
 
     df = pd.read_csv('data_files/unmatched_pantheon.csv')
     valid_points = []
