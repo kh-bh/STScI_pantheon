@@ -1,0 +1,22 @@
+Guidelines to Files and Order to be Run in
+
+Folder: data_collection_files
+
+data_collection_HST.py: 
+If there are images for the supernovae in HST at the resolved query, 
+create a file that stores the point of the list in the order "SNID, RA, DEC"
+    - File name that is returned back is valid_points_index_list_HST.csv
+
+data_collection_JWST.py: 
+If there are images for the supernovae in HST at the resolved query, 
+create a file that stores the point of the list in the order "SNID, RA, DEC"
+    - File name that is returned back is valid_points_index_list_JWST.csv
+
+download_data.ipynb:
+Downloads the data from the obeservations of either the JWST or HST valid points 
+**IMPORTANT** must change from HST or JWST in corrected
+
+download_data.py:
+Same as download_data.ipynb but in a python file
+
+
