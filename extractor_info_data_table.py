@@ -63,17 +63,35 @@ def create_brightest_index(root_dir, relative_key, output_csv):
 
     return data_dict
 
+def define_args(parser=None, usage=None, conflict_handler="resolve"):
+    if parser is None:
+        parser = argparse.ArgumentParser(usage=usage, conflict_handler=conflict_handler)
+    parser.add_argument(
+        "--root_dir",
+        home_dir = os.getcwd(),
+        root_dir = os.path.join(home_dir, 'source_extractor'),
+        default=root_dir,
+        type=str,
+        help="OPTIONAL the root directory of the source extractor file",
+    )
+    parser.add_argument(
+        "params",
+        default = None,
+        type = str,
+        help = "This is a list of params wanted for the data table"
+    )
+
+    return parser
 
 
 
 
-def main():
+if __name__== "__main__":
+    args = define_args().parse_args()
+
     home_dir = os.getcwd()
     ## Important for me, only look in source_extractor file
     root_dir = os.path.join(home_dir, 'source_extractor')
     print(root_dir)
     relative_key = 0
     create_brightest_index(root_dir, relative_key, "brightest_galaxy.csv")
-
-if __name__== "__main__":
-    main()
