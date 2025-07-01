@@ -20,6 +20,10 @@ Downloads the data from the obeservations of either the JWST or HST valid points
 download_data.py:
 Same as download_data.ipynb but in a python file
 
+extractor_brightest_info_data_table.py:
+Create a datatable with the BRIGHTEST and LARGEST objects of each source extractor file
+    - File returned back is brightest_galaxy.csv
+
 Folder: data_files  
     - Where all of the data files end up going
 
@@ -27,8 +31,12 @@ brightest_galaxy.csv:
     - SNID,File_key,Galaxy_Key,RA_Galaxy,Dec_Galaxy,Position_Angle,Major_Axis,Minor_Axis,Mag,Mag_Error,Flux,Flux_Error
     - A list of the brightest galaxies from each of the MAST queries
 
+corrected_mag.csv:
+    - SNID,filename,Date,Photometric Calibration,Inverse Sensitivity,Zeropoint,Wavelength,Zeropoint AB
+    - A list of the folders and their correcected magnitudes
+
 fits_summary.csv:
-    - SNID,filename,Telescope,Instrument,Filter
+    - SNID,filename,Date,Telescope,Instrument,Filter
     - Records the fits information of each image you have
 
 HST.csv:
