@@ -4,10 +4,12 @@ import glob
 import os
 from pathlib import Path
 import numpy as np
-from acstools import acszpt
+import subprocess
 
 
 def main():
+    subprocess.call("cd ..", shell = True)
+    print(os.getcwd())
     snids = get_snid_folders()
     print(len(snids))
     extract_fits_by_snid(snids, output_csv="corrected_mag.csv", recursive=True)
@@ -60,7 +62,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
     df.to_csv(output_csv, index=False)
     print(f"CSV exported: {output_csv}")
 
-def get_snid_folders(base_path="source_extractor"):
+def get_snid_folders(base_path="brightest_source_extractor"):
     """
     Returns a list of folder names (SNIDs) under the base path (base path defaults to source_extractor)
     """
