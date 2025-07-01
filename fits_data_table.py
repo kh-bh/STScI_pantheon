@@ -3,6 +3,7 @@ from astropy.io import fits
 import glob
 import os
 from pathlib import Path
+from acstools import acszpt
 
 def main():
     snids = get_snid_folders()
@@ -31,15 +32,22 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                 with fits.open(file_path) as hdul:
                     header = hdul[0].header
 
+                    date = header.get("DATE")
+                    detector = header.get("INSTRUME")
+                    filter = header.get("FILTER")
+
+
                     info = {
                         "SNID": snid,
                         "filename": file_path,
+                        "Date": date,
                         "Telescope": header.get("TELESCOP"),
-                        "Instrument": header.get("INSTRUME"),
-                        "Filter": header.get("FILTER"),
+                        "Instrument": detector,
+                        "Filter": filter
                     }
 
                     data_list.append(info)
+
             except Exception as e:
                 print(f"Error reading {file_path}: {e}")
 
