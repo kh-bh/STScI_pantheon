@@ -24,6 +24,10 @@ extractor_brightest_info_data_table.py:
 Create a datatable with the BRIGHTEST and LARGEST objects of each source extractor file
     - File returned back is brightest_galaxy.csv
 
+magnitude_corrector.py:
+Create a datatable that corrects for each magnitude of the brightest galaxy or the radius galaxy
+    - File returned is corrected_mag.csv
+
 Folder: data_files  
     - Where all of the data files end up going
 
