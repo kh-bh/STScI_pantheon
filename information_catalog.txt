@@ -1,5 +1,12 @@
 Guidelines to Files and Order to be Run in
 
+Step 1. Run data_collection_Hubble.py and data_collection_JWST
+Step 2. Run download_data.ipynb or download_data.py (make sure to manually change from HST to JWST)
+Step 3. Run fits_data_table.py
+Step 4. Run catalog_extractor.py
+Step 5. Run extractor_brightest_info_data_table.py and extractor_radius_info_data_table.py
+Step 6. Run magnitude_corrector_calculator.py
+
 Folder: data_collection_files
     - Where all the files related to data collection are
 
@@ -28,6 +35,10 @@ extractor_radius_info_data_table.py:
 Create a datatable with the RADIUS of objects of around the RA and DEC of each SN1 source extractor file
     - File returned back is radius_galaxy.csv
 
+fits_data_table.py:
+Create a datatable with most important information from the fits file 
+    - File returned back is fits_summary.csv
+
 magnitude_corrector_calculator.py:
 Create a datatable that corrects for each magnitude of the brightest galaxy or the radius galaxy
     - File returned is corrected_mag.csv
@@ -40,7 +51,7 @@ brightest_galaxy.csv:
     - A list of the brightest galaxies from each of the MAST queries
 
 fits_summary.csv:
-    - SNID,filename,Date,Telescope,Instrument,Filter
+    - SNID,filename,Date,Telescope,Instrument,Filter,CD1_1,CD1_2,CD2_1,CD2_2
     - Records the fits information of each image you have
 
 HST.csv:
@@ -88,5 +99,3 @@ default.param:
 
 default.sex:
     - the source extractor file
-
-
