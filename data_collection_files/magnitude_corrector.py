@@ -33,9 +33,10 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
 
         for file_path in file_paths:
             try:
+                
                 with fits.open(file_path) as hdul:
+                    
                     header = hdul[0].header
-
                     phot_mode = header.get("PHOTMODE")
                     phot_flam = header.get("PHOTFLAM")
                     phot_zpt = header.get("PHOTZPT")
@@ -45,7 +46,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
 
                     info = {
                         "SNID": snid,
-                        "filename": file_path,
+                        "Filename": file_path,
                         "Date": header.get("DATE"),
                         "Photometric Calibration": phot_mode,
                         "Inverse Sensitivity": phot_flam,
@@ -62,7 +63,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
     df.to_csv(output_csv, index=False)
     print(f"CSV exported: {output_csv}")
 
-def get_snid_folders(base_path="brightest_source_extractor"):
+def get_snid_folders(base_path="source_extractor"):
     """
     Returns a list of folder names (SNIDs) under the base path (base path defaults to source_extractor)
     """
