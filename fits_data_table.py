@@ -30,7 +30,9 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
         for file_path in file_paths:
             try:
                 with fits.open(file_path) as hdul:
+                    
                     header = hdul[0].header
+                    header_2 = hdul[1].header
 
                     date = header.get("DATE")
                     detector = header.get("INSTRUME")
@@ -43,7 +45,11 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                         "Date": date,
                         "Telescope": header.get("TELESCOP"),
                         "Instrument": detector,
-                        "Filter": filter
+                        "Filter": filter,
+                        "CD1_1": header_2.get("CD1_1"),
+                        "CD1_2": header_2.get("CD1_2"),
+                        "CD2_1": header_2.get("CD2_1"),
+                        "CD2_2": header_2.get("CD2_2")
                     }
 
                     data_list.append(info)
