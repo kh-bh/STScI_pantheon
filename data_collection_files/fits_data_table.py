@@ -3,9 +3,12 @@ from astropy.io import fits
 import glob
 import os
 from pathlib import Path
-from acstools import acszpt
+import subprocess
 
 def main():
+
+    subprocess.call("cd ..", shell = True)
+
     snids = get_snid_folders()
     print(len(snids))
     extract_fits_by_snid(snids, output_csv="fits_summary.csv", recursive=True)
