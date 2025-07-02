@@ -28,7 +28,7 @@ extractor_radius_info_data_table.py:
 Create a datatable with the RADIUS of objects of around the RA and DEC of each SN1 source extractor file
     - File returned back is radius_galaxy.csv
 
-magnitude_corrector.py:
+magnitude_corrector_calculator.py:
 Create a datatable that corrects for each magnitude of the brightest galaxy or the radius galaxy
     - File returned is corrected_mag.csv
 
@@ -39,10 +39,6 @@ brightest_galaxy.csv:
     - SNID,File_key,Galaxy_Key,RA_Galaxy,Dec_Galaxy,Position_Angle,Major_Axis,Minor_Axis,Mag,Mag_Error,Flux,Flux_Error
     - A list of the brightest galaxies from each of the MAST queries
 
-corrected_mag.csv:
-    - SNID,filename,Date,Photometric Calibration,Inverse Sensitivity,Zeropoint,Wavelength,Zeropoint AB
-    - A list of the folders and their correcected magnitudes
-
 fits_summary.csv:
     - SNID,filename,Date,Telescope,Instrument,Filter
     - Records the fits information of each image you have
@@ -50,6 +46,10 @@ fits_summary.csv:
 HST.csv:
     - RA,Dec,SNID,has_f1
     - Este's HST image catalog from May 
+
+magnitude_calculated.csv:
+    - SNID,filename,Date,Photometric Calibration,Inverse Sensitivity,Zeropoint,Wavelength,Zeropoint AB
+    - A list of the folders and their correcected magnitudes
 
 unmatched_pantheon.csv
     - SNID,IAUC,host,RA,Dec,RA_host,Dec_host,zhel,zcmb,zhelerr,zHD,zHDerr,PV,vpecerr,RA_group,Dec_group,zhel_group,zcmb_group,zHD_group,PV_group,in_group,has_host,is_SNz,resolved_coord
