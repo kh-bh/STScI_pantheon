@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import subprocess
 import os
 from astropy.io import fits
@@ -42,7 +44,7 @@ def catalog_creator(SNID, filename, filter, home_path, source_path = ""):
     new_fits_file_name = f"{base}.fits"
 
     
-    subprocess.call(exec_string, shell = True);
+    subprocess.run(exec_string, shell = True);
     os.rename(cat_file_name, new_cat_file_name)
     os.rename(fits_file_name, new_fits_file_name)
     move_files_group(SNID, base, new_cat_file_name, new_fits_file_name, home_path, source_path)
@@ -81,11 +83,11 @@ def move_files_group(SNid, base, cat_file_name, fits_file_name, home_path, sourc
 def main():
     df = pd.read_csv('data_files/fits_summary.csv')
     home_dir = os.getcwd()
-
+    print(home_dir)
     #activates the conda enviroment
-    conda_act = "conda activate " + home_dir + "/.conda"
-    subprocess.call("conda init", shell = True)
-    subprocess.call(conda_act, shell=True)
+    conda_act = "conda activate base"
+    subprocess.run("conda init", shell = True)
+    subprocess.run(conda_act, shell=True)
 
     #Makes sure that each of the source extractor files are avaliable and found
     source_extractor()
