@@ -7,7 +7,6 @@ import pathlib
 import subprocess
 
 
-
 def create_brightest_index(root_dir, relative_key, output_csv):
     """
     Create a datatable with the BRIGHTEST and LARGEST objects of each source extractor file

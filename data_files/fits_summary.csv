@@ -1,4 +1,4 @@
-SNID,filename,base,Date,Telescope,Instrument,Filter,CD1_1,CD1_2,CD2_1,CD2_2
+SNID,filename,File_key,Date,Telescope,Instrument,Filter,CD1_1,CD1_2,CD2_1,CD2_2
 1997bq,pantheon_data_folder/1997bq/mastDownload/HST/hst_16234_70_wfc3_ir_f160w_ieel70/hst_16234_70_wfc3_ir_f160w_ieel70_drz.fits,hst_16234_70_wfc3_ir_f160w_ieel70_drz,2024-11-09,HST,WFC3,F160W,-3.5625000794728e-05,-7.4879089720835e-22,-7.1713535520259e-22,3.56250007947285e-05
 1997bq,pantheon_data_folder/1997bq/mastDownload/HST/idgg31020/idgg31020_drz.fits,idgg31020_drz,2025-04-07,HST,WFC3,F160W,3.11591675773636e-05,1.72698279525356e-05,1.72698279525356e-05,-3.1159167577363e-05
 1997bq,pantheon_data_folder/1997bq/mastDownload/HST/idgg3b020/idgg3b020_drz.fits,idgg3b020_drz,2025-04-11,HST,WFC3,F160W,-3.1821232491063e-05,1.60171734202421e-05,1.60171734202421e-05,3.18212324910632e-05
