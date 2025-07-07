@@ -31,14 +31,15 @@ def create_brightest_index(root_dir, relative_key, output_csv):
             strPath = os.path.realpath(file_path)
             nmFolders = strPath.split(os.path.sep)
 
-
             SNID_key = nmFolders[-3]
-            file_key = nmFolders[-2]
+
+            b = os.path.basename(file_path)
+            filename_without_extension = os.path.splitext(b)[0]
             relative_key += 1
 
             info = {
                     "SNID": SNID_key,
-                    "File_key": file_key, 
+                    "File_key": filename_without_extension, 
                     "Galaxy_Key": relative_key,
                     "RA_Galaxy": starcounts['ALPHA_J2000'][0],
                     "Dec_Galaxy": starcounts['DELTA_J2000'][0],
