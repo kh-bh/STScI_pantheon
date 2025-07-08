@@ -4,7 +4,6 @@ import numpy as np
 import glob
 import os
 import pathlib
-import subprocess
 
 
 def create_radius_index(root_dir, relative_key, output_csv):
@@ -74,7 +73,6 @@ def create_radius_index(root_dir, relative_key, output_csv):
 
 
 if __name__== "__main__":
-    subprocess.call("cd ..", shell = True)
     home_dir = os.getcwd()
     ## Important for me, only look in source_extractor file
     root_dir = os.path.join(home_dir, 'source_extractor')

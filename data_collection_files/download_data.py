@@ -1,11 +1,9 @@
 import os
 from astroquery.mast import Observations
 import pandas as pd
-import subprocess
 
 def main():
 
-    subprocess.call("cd ..", shell = True)
 
     df = pd.read_csv('data_files/valid_points_list.csv')
     df_string = df.astype(str)

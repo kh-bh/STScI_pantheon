@@ -4,18 +4,16 @@ import glob
 import os
 from pathlib import Path
 import numpy as np
-import subprocess
+
 
 
 def main():
-    subprocess.call("cd ..", shell = True)
-    print(os.getcwd())
     snids = get_snid_folders()
     print(len(snids))
-    extract_fits_by_snid(snids, output_csv="corrected_mag.csv", recursive=True)
+    extract_fits_by_snid(snids, recursive=True)
 
 
-def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv="corrected_mag.csv", recursive=True, data_list = []):
+def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv="magnitude_calculated.csv", recursive=True, data_list = []):
     """
     Loops over SNIDs, reads .fits files in /source_extractor/{SNID}/ folders
         - Extracts the Telescope, Instrument Used, and Filter

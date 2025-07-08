@@ -3,11 +3,9 @@ from astropy.io import fits
 import glob
 import os
 from pathlib import Path
-import subprocess
+
 
 def main():
-
-    subprocess.call("cd ..", shell = True)
 
     snids = get_snid_folders()
     print(len(snids))
