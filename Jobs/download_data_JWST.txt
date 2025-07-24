@@ -1,3 +1,0 @@
-.//data_collection_files/download_data_JWST.py 0 20
-.//data_collection_files/download_data_JWST.py 20 40
-.//data_collection_files/download_data_JWST.py 40 51
