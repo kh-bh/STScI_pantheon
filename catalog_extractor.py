@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 import subprocess
 import os
-from astropy.io import fits
 import pandas as pd
 import shutil
+import sys
 
 def source_extractor(source_extractor_path = ""):
     """
@@ -20,22 +21,20 @@ def source_extractor(source_extractor_path = ""):
         subprocess.call("sex -d -> default.sex", shell=True)
         print("HEY MAKE THE DEFAULT SEX FILE")
 
-def catalog_creator(SNID, filename, filter, home_path, source_path = ""):
+def catalog_creator(SNID, filename, base, filter, home_path, sex_file_name = 'default', source_path = ""):
+    #Check if the filter is of type detection (full stack image). Don't go through these
     if filter == 'detection':
         return;
-
-    base_file = os.path.basename(filename)
-    base, _ = os.path.splitext(base_file)
-
+    #Check if source extractor was already done. Don't do these
     done = check_file_exist(home_path, source_path, SNID, base)
     if done == True:
         return;
 
-    dest_path = home_path + "/" + filename
+    dest_path = filename
+    exec_string = 'sex ' + dest_path + ' -c ' + sex_file_name + '.sex'
 
-    exec_string = 'sex ' + dest_path + ' -c ' + 'default.sex'
-
-    cat_file_name = "test.cat"
+    
+    cat_file_name = f"{sex_file_name}.cat"
     new_cat_file_name = f"{base}.cat"
 
     fits_file_name = "check.fits"
@@ -43,8 +42,9 @@ def catalog_creator(SNID, filename, filter, home_path, source_path = ""):
 
     
     subprocess.call(exec_string, shell = True);
+
     os.rename(cat_file_name, new_cat_file_name)
-    os.rename(fits_file_name, new_fits_file_name)
+    #os.rename(fits_file_name, new_fits_file_name)
     move_files_group(SNID, base, new_cat_file_name, new_fits_file_name, home_path, source_path)
 
 def check_file_exist(home_path, source_path, SNID, base):
@@ -71,7 +71,7 @@ def move_files_group(SNid, base, cat_file_name, fits_file_name, home_path, sourc
         destination_path = f"{home_path}/{source_path}/{SNid}/{base}"
         os.makedirs(destination_path, exist_ok=True)
         shutil.move(cat_file_name, destination_path)
-        shutil.move(fits_file_name, destination_path)
+        #shutil.move(fits_file_name, destination_path)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
@@ -79,20 +79,29 @@ def move_files_group(SNid, base, cat_file_name, fits_file_name, home_path, sourc
 
 
 def main():
-    df = pd.read_csv('data_files/fits_summary.csv')
-    home_dir = os.getcwd()
+    full_dataframe = pd.read_csv('/home/bkhatri/STScI_pantheon/data_collection_files/data_files/fits_summary.csv')
 
     #activates the conda enviroment
-    conda_act = "conda activate " + home_dir + "/.conda"
+    conda_act = "conda activate .conda"
     subprocess.call("conda init", shell = True)
     subprocess.call(conda_act, shell=True)
 
+    df = full_dataframe[start:end]
     #Makes sure that each of the source extractor files are avaliable and found
-    source_extractor()
+    source_extractor(source_extractor_path= "/home/bkhatri/STScI_pantheon/")
     for row in df.itertuples():
-        catalog_creator(row.SNID, row.filename, row.Filter, home_dir, source_path= "source_extractor")
+        catalog_creator(SNID = row.SNID, 
+                        filename = row.filename, 
+                        base = row.File_key,
+                        filter = row.Filter, 
+                        home_path = "/astro/armin/bhoomika",
+                        sex_file_name = sex_name, 
+                        source_path= "source_extractor")
 
 if __name__=="__main__":
+    start = int(sys.argv[1])
+    end = int(sys.argv[2])
+    sex_name = sys.argv[3]
     main()
                          
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pandas as pd 
 from astropy.io import fits
 import glob
@@ -7,9 +8,9 @@ from pathlib import Path
 
 def main():
 
-    snids = get_snid_folders()
+    snids = get_snid_folders(base_path="/astro/armin/bhoomika/pantheon_data_folder")
     print(len(snids))
-    extract_fits_by_snid(snids, output_csv="fits_summary.csv", recursive=True)
+    extract_fits_by_snid(snids,base_path="/astro/armin/bhoomika/pantheon_data_folder", output_csv="fits_summary.csv", recursive=True)
 
 
 def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv="fits_summary.csv", recursive=True, data_list = []):

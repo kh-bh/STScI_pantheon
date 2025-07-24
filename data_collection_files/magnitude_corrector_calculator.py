@@ -8,9 +8,12 @@ import numpy as np
 
 
 def main():
-    snids = get_snid_folders()
+    snids = get_snid_folders(base_path= '/astro/armin/bhoomika/source_extractor')
     print(len(snids))
-    extract_fits_by_snid(snids, recursive=True)
+    extract_fits_by_snid(snids,
+                         base_path= '/astro/armin/bhoomika/pantheon_data_folder',
+                         output_csv= 'magnitude_calculated.csv',
+                         recursive=True)
 
 
 def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv="magnitude_calculated.csv", recursive=True, data_list = []):
@@ -39,6 +42,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                     phot_flam = header.get("PHOTFLAM")
                     phot_zpt = header.get("PHOTZPT")
                     phot_plam = header.get("PHOTPLAM")
+                    filter = header.get("FILTER")
 
                     zp_ab = -2.5 * np.log10(phot_flam) - 5 * np.log10(phot_plam) - 2.408
 
@@ -47,6 +51,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                         "Filename": file_path,
                         "Date": header.get("DATE"),
                         "Photometric Calibration": phot_mode,
+                        "Filter": filter,
                         "Inverse Sensitivity": phot_flam,
                         "Zeropoint": phot_zpt,
                         "Wavelength": phot_plam,
@@ -55,7 +60,7 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
 
                     data_list.append(info)
             except Exception as e:
-                print(f"Error reading {file_path}: {e}")
+                print(f"Error: {e}")
     # Convert to DataFrame and export
     df = pd.DataFrame(data_list)
     df.to_csv(output_csv, index=False)

@@ -60,7 +60,6 @@ def create_brightest_index(root_dir, relative_key, output_csv):
     df = pd.DataFrame(data_dict)
     df.to_csv(output_csv, index=False)
     print(f"CSV exported: {output_csv}")
-
     return data_dict
 
 
@@ -68,9 +67,8 @@ def create_brightest_index(root_dir, relative_key, output_csv):
 
 
 if __name__== "__main__":
-    home_dir = os.getcwd()
-    ## Important for me, only look in source_extractor file
-    root_dir = os.path.join(home_dir, 'source_extractor')
-    print(root_dir)
+    source_extractor_path = "/astro/armin/bhoomika/source_extractor"
+    #root_dir = os.path.join(home_dir, 'source_extractor')
+    #print(root_dir)
     relative_key = 0
-    create_brightest_index(root_dir, relative_key, "brightest_galaxy.csv")
+    create_brightest_index(source_extractor_path, relative_key, "brightest_galaxy.csv")
