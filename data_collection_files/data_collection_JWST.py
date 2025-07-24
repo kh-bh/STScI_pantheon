@@ -1,10 +1,12 @@
+#!/usr/bin/env python
 from astroquery.mast import Observations
 import pandas as pd
+import sys
 
 def main():
 
 
-    df = pd.read_csv('data_files/unmatched_pantheon.csv')
+    df = pd.read_csv('data_collection_files/data_files/unmatched_pantheon.csv')
     valid_points = []
     def record_index_SP1A(resolved_coord_index):
         """
@@ -46,4 +48,5 @@ def main():
             df_vp.to_csv('valid_points_index_list_JWST.csv', index=False)
 
 if __name__== "__main__":
+    txt_file = sys.argv[1]
     main()

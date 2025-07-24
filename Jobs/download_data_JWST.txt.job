@@ -1,0 +1,21 @@
+universe = vanilla
+getenv = true
+executable = /home/bkhatri/STScI_pantheon/data_collection_files/download_data_JWST.py
+notification = Never
+priority = 0
+transfer_executable = true
+should_transfer_files = IF_NEEDED
+when_to_transfer_output = ON_EXIT
+hold = false
+log = /home/bkhatri/STScI_pantheon/logs/download_data_JWST.txt.job/condor_$(Cluster).log
+output = /home/bkhatri/STScI_pantheon/logs/download_data_JWST.txt.job/stdout_$(Cluster)_$(Process).log
+error = /home/bkhatri/STScI_pantheon/logs/download_data_JWST.txt.job/stderr_$(Cluster)_$(Process).log
+
+arguments = 0 20
+queue 
+
+arguments = 20 40
+queue 
+
+arguments = 40 51
+queue 

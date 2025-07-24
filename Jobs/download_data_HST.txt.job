@@ -1,0 +1,57 @@
+universe = vanilla
+getenv = true
+executable = /home/bkhatri/STScI_pantheon/data_collection_files/download_data_HST.py
+notification = Never
+priority = 0
+transfer_executable = true
+should_transfer_files = IF_NEEDED
+when_to_transfer_output = ON_EXIT
+hold = false
+log = /home/bkhatri/STScI_pantheon/logs/download_data_HST.txt.job/condor_$(Cluster).log
+output = /home/bkhatri/STScI_pantheon/logs/download_data_HST.txt.job/stdout_$(Cluster)_$(Process).log
+error = /home/bkhatri/STScI_pantheon/logs/download_data_HST.txt.job/stderr_$(Cluster)_$(Process).log
+
+arguments = 0 20
+queue 
+
+arguments = 20 40
+queue 
+
+arguments = 40 60
+queue 
+
+arguments = 60 80
+queue 
+
+arguments = 80 100
+queue 
+
+arguments = 100 120
+queue 
+
+arguments = 120 140
+queue 
+
+arguments = 140 160
+queue 
+
+arguments = 160 180
+queue 
+
+arguments = 180 200
+queue 
+
+arguments = 200 220
+queue 
+
+arguments = 220 240
+queue 
+
+arguments = 240 260
+queue 
+
+arguments = 260 280
+queue 
+
+arguments = 280 300
+queue 

@@ -1,9 +1,11 @@
+#!/usr/bin/env python
 from astroquery.mast import Observations
 import pandas as pd
+import sys
 
 def main():
 
-    df = pd.read_csv('data_files/unmatched_pantheon.csv')
+    df = pd.read_csv('data_collection_files/data_files/unmatched_pantheon.csv')
     valid_points = []
     def record_index_SP1A(resolved_coord_index):
         """
@@ -20,7 +22,7 @@ def main():
             obs_table = Observations.query_criteria(coordinates=df['resolved_coord'][resolved_coord_index],
                                             radius="0.006 deg",
                                             intentType = 'science',
-                                            filters = ['F1*'],
+                                            filters = ['F1*', 'F425W','F775W', 'F625W'],
                                             obs_collection=['HST'])
             obs_table = obs_table[obs_table['calib_level']==3]
             data_products = Observations.get_product_list(obs_table)
@@ -46,4 +48,5 @@ def main():
             df_vp.to_csv('valid_points_index_list_HST.csv', index=False)
 
 if __name__== "__main__":
+    txt_file = sys.argv[1]
     main()

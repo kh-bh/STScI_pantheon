@@ -1,0 +1,15 @@
+.//data_collection_files/download_data_HST.py 0 20
+.//data_collection_files/download_data_HST.py 20 40
+.//data_collection_files/download_data_HST.py 40 60
+.//data_collection_files/download_data_HST.py 60 80
+.//data_collection_files/download_data_HST.py 80 100
+.//data_collection_files/download_data_HST.py 100 120
+.//data_collection_files/download_data_HST.py 120 140
+.//data_collection_files/download_data_HST.py 140 160
+.//data_collection_files/download_data_HST.py 160 180
+.//data_collection_files/download_data_HST.py 180 200
+.//data_collection_files/download_data_HST.py 200 220
+.//data_collection_files/download_data_HST.py 220 240
+.//data_collection_files/download_data_HST.py 240 260
+.//data_collection_files/download_data_HST.py 260 280
+.//data_collection_files/download_data_HST.py 280 300
