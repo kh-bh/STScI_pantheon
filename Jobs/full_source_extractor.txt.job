@@ -1,0 +1,42 @@
+universe = vanilla
+getenv = true
+executable = /home/bkhatri/STScI_pantheon/catalog_extractor.py
+notification = Never
+priority = 0
+transfer_executable = true
+should_transfer_files = IF_NEEDED
+when_to_transfer_output = ON_EXIT
+hold = false
+log = /home/bkhatri/STScI_pantheon/logs/full_source_extractor.txt.job/condor_$(Cluster).log
+output = /home/bkhatri/STScI_pantheon/logs/full_source_extractor.txt.job/stdout_$(Cluster)_$(Process).log
+error = /home/bkhatri/STScI_pantheon/logs/full_source_extractor.txt.job/stderr_$(Cluster)_$(Process).log
+
+arguments = 0 1800 1
+queue 
+
+arguments = 1800 3600 2
+queue 
+
+arguments = 3600 5400 3
+queue 
+
+arguments = 5400 7200 4
+queue 
+
+arguments = 7200 9000 5
+queue 
+
+arguments = 9000 10800 6
+queue 
+
+arguments = 10800 12600 7
+queue 
+
+arguments = 12600 14400 8
+queue 
+
+arguments = 14400 16200 9
+queue 
+
+arguments = 16200 18000 10
+queue 
