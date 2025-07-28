@@ -9,13 +9,13 @@ import sep
 def define_args():
     parser = argparse.ArgumentParser(description="Generate DS9 region files", conflict_handler='resolve')
     
-    if 'DS9OUT_ROOTDIR' in os.environ:
-        outrootdir = os.path.abspath(f'{os.environ["DS9OUT_ROOTDIR"]}')
+    if 'MASS_STEP_OUT_ROOTDIR' in os.environ:
+        outrootdir = os.path.abspath(f'{os.environ["MASS_STEP_OUT_ROOTDIR"]}')
     else:
         outrootdir = '.'
 
-    if 'DS9DATA_ROOTDIR' in os.environ:
-        datadir = os.path.abspath(f'{os.environ["DS9DATA_ROOTDIR"]}')
+    if 'MASS_STEP_DATA_ROOTDIR' in os.environ:
+        datadir = os.path.abspath(f'{os.environ["MASS_STEP_DATA_ROOTDIR"]}')
     else:
         datadir = '.'
 

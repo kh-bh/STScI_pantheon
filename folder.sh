@@ -1,3 +1,3 @@
-export DS9DATA_ROOTDIR='/Users/faerest/Desktop/file_set3'
-export DS9SRC_ROOTDIR='/Users/faerest/Desktop/pantheon_test_file/test1'
-export DS9OUT_ROOTDIR=$DS9DATA_ROOTDIR/regionfiles
+export MASS_STEP_DATA_ROOTDIR='/astro/armin/bhoomika'
+export MASS_STEP_SRC_ROOTDIR='/astro/armin/bhoomika'
+export MASS_STEP_OUT_ROOTDIR=$DS9DATA_ROOTDIR/regionfiles
