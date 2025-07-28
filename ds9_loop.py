@@ -18,6 +18,10 @@ def define_args():
         datadir = os.path.abspath(f'{os.environ["MASS_STEP_DATA_ROOTDIR"]}')
     else:
         datadir = '.'
+    if 'MASS_STEP_TABLES_ROOTDIR' in os.environ:
+        tabledir = os.path.abspath(f'{os.environ["MASS_STEP_TABLES_ROOTDIR"]}')
+    else:
+        tabledir = '.'
 
     parser.add_argument(
         "supernova_names", 
@@ -29,14 +33,14 @@ def define_args():
     parser.add_argument(
         "--fits_summary_path", 
         type=str, 
-        default=f'{datadir}/fits_summary.csv', 
+        default=f'{tabledir}/data_collection_files/data_files/fits_summary.csv', 
         help="Path to the FITS summary CSV file (default=%(default)s)"
     )
 
     parser.add_argument(
         "--brightest_galaxy_path", 
         type=str, 
-        default=f'{datadir}/data_collection_files/data_files/brightest_galaxy.csv', 
+        default=f'{tabledir}/data_collection_files/data_files/brightest_galaxy.csv', 
         help="Path to the brightest galaxy CSV file (default=%(default)s)"
     )
 
@@ -196,7 +200,7 @@ if __name__ == "__main__":
     fits_summary = pd.read_table(args.fits_summary_path,sep=',') #original
 
     print('Test0', args.supernova_names)
-    print('Test0000', args.supernova_names[0], args.supernova_names[1])
+    #print('Test0000', args.supernova_names[0], args.supernova_names[1])
 
     if args.supernova_names[0].lower() == 'all':
         print('TEST1', fits_summary['SNID'])
