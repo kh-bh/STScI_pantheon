@@ -124,18 +124,39 @@ def get_region_info2(table):
         table.loc[ix,'a_pixels'] = a
         table.loc[ix,'b_pixels'] = b
 
+      
+
         #theta_rad = 0.5 * math.atan2(2 * cxy, cxx - cyy)
-        theta_deg = math.degrees(theta_rad)
+        theta_deg_old = math.degrees(theta_rad)
+        theta_deg = np.degrees(np.arctan2(-row['CD1_2'], row['CD2_2']))
+        table.loc[ix,'theta_deg_old'] = theta_deg_old
         table.loc[ix,'theta_deg'] = theta_deg
         table.loc[ix,'PA_deg'] = theta_deg+90.0
         table.loc[ix,'theta_rad'] = theta_rad
 
-        a_arcsec = math.fabs(row['CD1_1'])*3600.0*a
-        b_arcsec = math.fabs(row['CD1_1'])*3600.0*b
+        print (f'theta_deg old {theta_deg_old} {a} {b} {theta_rad}')
+        print (f'theta_deg new {theta_deg}')
+
+        # Pixel scale (arcsec/pixel)
+        pixscale = 3600.0 * np.sqrt(math.fabs((row['CD1_1']*row['CD2_2']) - row['CD1_2']*row['CD2_1']))
+        #pixscale = 3600.0 * np.sqrt(CD1_1*CD2_2 - CD1_2*CD2_1)
+
+        #sys.exit(0)
+
+        #a_arcsec = a*pixscale
+        #b_arcsec = b*pixscale
+        a_arcsec = a * pixscale * row["Kron_Radius"]
+        b_arcsec = b * pixscale * row["Kron_Radius"]
+ 
+
+
+        # a_arcsec = math.fabs(row['CD1_1'])*3600.0*a
+        # b_arcsec = math.fabs(row['CD1_1'])*3600.0*b
         table.loc[ix,'a_arcsec'] = a_arcsec
         table.loc[ix,'b_arcsec'] = b_arcsec
 
-        continue
+
+        #continue
 
         # trace = cxx + cyy
         # delta = (cxx - cyy) / 2
@@ -159,7 +180,7 @@ def get_region_info2(table):
         # table.loc[ix,'a_arcsec'] = a
         # table.loc[ix,'b_arcsec'] = b
 
-        print(f'PA(deg) and a, b of ellipse:{PA_deg}, {a}, {b}')
+        #print(f'PA(deg) and a, b of ellipse:{PA_deg}, {a}, {b}')
     return(table)
 
 
@@ -255,9 +276,7 @@ if __name__ == "__main__":
 
 
     if args.supernova_names[0].lower() == 'all':
-        print('TEST1', fits_summary['SNID'])
         supernova_names = sorted(fits_summary['SNID'].unique())
-        print('TEST2', supernova_names)
     else:
         supernova_names = args.supernova_names
 
@@ -268,9 +287,8 @@ if __name__ == "__main__":
     brightest_galaxy = pd.read_table(args.brightest_galaxy_path,sep=',') #original
 
     # reading table at args.brightest_galaxy_path and assigning it to brightest_galaxy variable
-    print (f'TEST TEST TEST Loading unmatched_pantheon: {args.unmatched_pantheon_path}')
+    print (f'Loading unmatched_pantheon: {args.unmatched_pantheon_path}')
     unmatched_pantheon = pd.read_table(args.unmatched_pantheon_path,sep=',') #original
-    print (f"AAAAAHHHHH {unmatched_pantheon}")
     fits_summary = combine_fs_and_up(supernova_names, fits_summary, unmatched_pantheon)
 
     # receiving end: the "filenameshort" column in the fits_summary table
@@ -375,15 +393,12 @@ if __name__ == "__main__":
             # make region file
             output = ['global color=blue dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1']
             output.append('fk5')
-            print(f'OUTPUT1',output)
 
             for cmd in cmds:
                 output.append(cmd)
                 all_output.append(cmd)
-            print(f'OUTPUT2',output)
 
             output.extend(green_ellipse_list)
-            print(f'OUTPUT3',output)
             # sys.exit(0)
 
             #ADD HERE
@@ -423,7 +438,6 @@ if __name__ == "__main__":
 
             relative_fitsfilename = os.path.relpath(fitsfilename, start=sn_rootdir)
             relative_regionfilename = os.path.relpath(regionfilename, start=sn_rootdir)
-            print('fff',relative_fitsfilename)
 
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
