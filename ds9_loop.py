@@ -78,8 +78,12 @@ def define_args():
 # ds9:
 def make_ellipse_command_for_position(ra,dec,position_angle,major_axis,minor_axis,name=None,color='red',width=4):
     print(f'\nMaking ellipse command: RA_Galaxy {ra}, Dec_Galaxy {dec}, name {name}, Position_Angle {position_angle}, Major_Axis {major_axis}, Minor_Axis {minor_axis}')
-    name='{'+f'{name}'+'}'
-    s = f'ellipse({ra},{dec},{major_axis}",{minor_axis}",{position_angle}) # color={color} width={width} text={name}'
+    s = f'ellipse({ra},{dec},{major_axis}",{minor_axis}",{position_angle}) # color={color} width={width}'
+    if name is not None:
+        name='{'+f'{name}'+'}'
+        s+=f' text={name}'
+
+    #s = f'ellipse({ra},{dec},{major_axis}",{minor_axis}",{position_angle}) # color={color} width={width} text={name}'
     print(s)
     return(s)
 
@@ -224,7 +228,7 @@ def combine_fs_and_up(supernova_names, fits_summary, unmatched_pantheon):
 
 
 
-def get_region_commands(index, fits_summary):
+def get_region_commands(index, fits_summary, ellipse_color='red', ellipse_width=1, sn_name=None):
 
     file_key = fits_summary.at[index, "File_key"]
     if isinstance(file_key, float) and np.isnan(file_key):
@@ -237,7 +241,7 @@ def get_region_commands(index, fits_summary):
     PA_deg, a_arcsec, b_arcsec = fits_summary.loc[index,['PA_deg','a_arcsec','b_arcsec']]
 
     cmds = []
-    cmds.append(make_ellipse_command_for_position(ra_galaxy, dec_galaxy, PA_deg, a_arcsec, b_arcsec, name=sn_name))
+    cmds.append(make_ellipse_command_for_position(ra_galaxy, dec_galaxy, PA_deg, a_arcsec, b_arcsec, name=sn_name, color=ellipse_color, width=ellipse_width))
     cmds.append(make_circle_command_for_position(fits_summary.at[index, "RA_SN"], fits_summary.at[index, "Dec_SN"], name=sn_name))
 
     return cmds, ra_galaxy, dec_galaxy
@@ -311,10 +315,43 @@ if __name__ == "__main__":
 
         ds9cmd = f'\ncd {sn_rootdir} \n ds9 -zscale '
 
-        #if sn_name=='1997bq':
+        # if sn_name=='2010ai':
 
-            #print(fits_summary.loc[sn_ix,['File_key','Position_Angle','Major_Axis','Minor_Axis','a_pixels','b_pixels','theta_deg','PA_deg','a_arcsec','b_arcsec']])
+        #     print(fits_summary.loc[sn_ix,['File_key','Position_Angle','Major_Axis','Minor_Axis','a_pixels','b_pixels','theta_deg','PA_deg','a_arcsec','b_arcsec']])
+        #     sys.exit(0)
+
+
+        #CHANGE TO GREEN 
+
+        green_ellipse_list=[]
+        for index in sn_ix:
+
+            if fits_summary.loc[index,"Telescope"]=='JWST':
+                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+                continue
+
+            if fits_summary.loc[index,"Filter"]=='detection':
+                print(f'WARNING! skipping since filter={fits_summary.loc[index,"Filter"]}')
+                continue
+                
+
+            #print(f'OH DEAR!',fits_summary.columns)
+            #print(f'Telescope: {fits_summary.loc[index,"Telescope"]}, Filter:{fits_summary.loc[index,"Filter"]}')
             #sys.exit(0)
+
+            cmds, ra_galaxy, dec_galaxy = get_region_commands(index, fits_summary, ellipse_color='green', ellipse_width=1, sn_name=None)
+            if (cmds is None) or (cmds is []):
+                continue
+
+            green_ellipse_list.append(cmds[0])
+            # print (f' GIRL I HOPE THIS WORKS {green_ellipse_list}')
+            # print (f'LOOOOOOOOOOK{cmds}')
+            # print(f'HAHAHHAHAHHAHAHAH anyway... {cmds[0]}')
+            
+
+        print(f'PRINTING THE ELLIPSE LIST THAT WILL BE IN GREEN... {green_ellipse_list}')
+        
+        
 
         for index in sn_ix:
 
@@ -327,20 +364,29 @@ if __name__ == "__main__":
                 continue
                 
 
-            #print(f'FUCK!',fits_summary.columns)
+            #print(f'OH DEAR!',fits_summary.columns)
             #print(f'Telescope: {fits_summary.loc[index,"Telescope"]}, Filter:{fits_summary.loc[index,"Filter"]}')
             #sys.exit(0)
 
-            cmds, ra_galaxy, dec_galaxy = get_region_commands(index, fits_summary)
+            cmds, ra_galaxy, dec_galaxy = get_region_commands(index, fits_summary, ellipse_width=4, sn_name=sn_name)
             if (cmds is None) or (cmds is []):
                 continue
 
             # make region file
             output = ['global color=blue dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1']
             output.append('fk5')
+            print(f'OUTPUT1',output)
+
             for cmd in cmds:
                 output.append(cmd)
                 all_output.append(cmd)
+            print(f'OUTPUT2',output)
+
+            output.extend(green_ellipse_list)
+            print(f'OUTPUT3',output)
+            # sys.exit(0)
+
+            #ADD HERE
 
             #fitsfilename = f'{sn_rootdir}/{fits_summary.at[index, "File_key"]}/{fits_summary.at[index, "File_key"]}.fits'
 
