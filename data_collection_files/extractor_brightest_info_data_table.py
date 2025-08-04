@@ -20,7 +20,7 @@ def create_brightest_index(root_dir, relative_key, output_csv):
     cat_files = glob.glob(os.path.join(root_dir, '**', '*.cat'), recursive=True)
 
     data_dict = []
-
+    i = 0
     for file_path in cat_files:
         try:
             starcounts = ascii.read(file_path, data_start=0)
@@ -43,6 +43,7 @@ def create_brightest_index(root_dir, relative_key, output_csv):
                     "Position_Angle": starcounts['THETA_IMAGE'][0],
                     "Major_Axis": starcounts['A_IMAGE'][0],
                     "Minor_Axis": starcounts['B_IMAGE'][0],
+                    "Kron_Radius": starcounts['KRON_RADIUS'][0],
                     "Mag": starcounts['MAG_AUTO'][0],
                     "Mag_Error": starcounts['MAGERR_AUTO'][0],
                     "Flux": starcounts['FLUX_AUTO'][0],
@@ -52,11 +53,16 @@ def create_brightest_index(root_dir, relative_key, output_csv):
                     "CYY":starcounts['CYY_IMAGE'][0]
                     }
             data_dict.append(info)
-
+            print(1)
+            i = i + 1
         except Exception as e:
             print(f"Error reading {file_path}: {e}")
         
         # Convert to DataFrame and export
+        if i%10 == 0:
+            df = pd.DataFrame(data_dict)
+            df.to_csv(output_csv, index=False)
+    
     df = pd.DataFrame(data_dict)
     df.to_csv(output_csv, index=False)
     print(f"CSV exported: {output_csv}")
