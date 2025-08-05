@@ -78,7 +78,7 @@ def define_args():
 # ds9:
 def make_ellipse_command_for_position(ra,dec,position_angle,major_axis,minor_axis,name=None,color='red',width=4):
     print(f'\nMaking ellipse command: RA_Galaxy {ra}, Dec_Galaxy {dec}, name {name}, Position_Angle {position_angle}, Major_Axis {major_axis}, Minor_Axis {minor_axis}')
-    s = f'ellipse({ra},{dec},{major_axis}",{minor_axis}",{position_angle}) # color={color} width={width}'
+    s = f'ellipse({ra},{dec},{minor_axis}",{major_axis}",{position_angle}) # color={color} width={width}'
     if name is not None:
         name='{'+f'{name}'+'}'
         s+=f' text={name}'
@@ -127,19 +127,20 @@ def get_region_info2(table):
       
 
         #theta_rad = 0.5 * math.atan2(2 * cxy, cxx - cyy)
-        theta_deg_old = math.degrees(theta_rad)
-        theta_deg = np.degrees(np.arctan2(-row['CD1_2'], row['CD2_2']))
-        table.loc[ix,'theta_deg_old'] = theta_deg_old
+        theta_deg = math.degrees(theta_rad)
+        alpha_deg = np.degrees(np.arctan2(-row['CD1_2'], row['CD2_2']))
         table.loc[ix,'theta_deg'] = theta_deg
-        table.loc[ix,'PA_deg'] = theta_deg+90.0
+        table.loc[ix,'alpha_deg'] = alpha_deg
+        table.loc[ix,'PA_deg'] = theta_deg-90.0-alpha_deg
         table.loc[ix,'theta_rad'] = theta_rad
 
-        print (f'theta_deg old {theta_deg_old} {a} {b} {theta_rad}')
-        print (f'theta_deg new {theta_deg}')
+        #print (f'theta_deg {theta_deg} {a} {b} {theta_rad}')
+        #print (f'alpha_deg {alpha_deg}')
 
         # Pixel scale (arcsec/pixel)
         pixscale = 3600.0 * np.sqrt(math.fabs((row['CD1_1']*row['CD2_2']) - row['CD1_2']*row['CD2_1']))
         #pixscale = 3600.0 * np.sqrt(CD1_1*CD2_2 - CD1_2*CD2_1)
+        table.loc[ix,'pixscale'] = pixscale
 
         #sys.exit(0)
 
@@ -443,6 +444,11 @@ if __name__ == "__main__":
             print(ds9cmd)
 
             save_region_file(regionfilename, output)
+        
+        if sn_name == '1997bq':
+            print(fits_summary.loc[sn_ix,['File_key','theta_deg','alpha_deg','PA_deg','pixscale']])
+        print(ds9cmd)
+
 
         ds9cmds_list.append(ds9cmd)
 
