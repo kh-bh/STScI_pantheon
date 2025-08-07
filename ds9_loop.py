@@ -11,15 +11,18 @@ def define_args():
     
     if 'MASS_STEP_OUT_ROOTDIR' in os.environ:
         outrootdir = os.path.abspath(f'{os.environ["MASS_STEP_OUT_ROOTDIR"]}')
+        print(outrootdir)
     else:
         outrootdir = '.'
 
     if 'MASS_STEP_DATA_ROOTDIR' in os.environ:
         datadir = os.path.abspath(f'{os.environ["MASS_STEP_DATA_ROOTDIR"]}')
+        print(datadir)
     else:
         datadir = '.'
     if 'MASS_STEP_TABLES_ROOTDIR' in os.environ:
         tabledir = os.path.abspath(f'{os.environ["MASS_STEP_TABLES_ROOTDIR"]}')
+        print(tabledir)
     else:
         tabledir = '.'
 
@@ -190,6 +193,7 @@ def save_region_file(filepath, output):
     print(f'Writing region file to {filepath}')
     with open(filepath, "w") as file:
         for line in output:
+            #print(line, 'printing line heeeeerrrrreeeeeee')
             file.write(str(line) + "\n")
     file.close()
 
