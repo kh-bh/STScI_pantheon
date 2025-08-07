@@ -30,10 +30,11 @@ def define_args():
         help="List of supernova names to process."
     )
 
+    print('GGGGGG',tabledir)
     parser.add_argument(
         "--fits_summary_path", 
         type=str, 
-        default=f'{tabledir}/data_collection_files/data_files/fits_summary.csv', 
+        default=f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv', 
         help="Path to the FITS summary CSV file (default=%(default)s)"
     )
 
@@ -212,6 +213,8 @@ def combine_fs_and_bg(supernova_names, fits_summary, brightest_galaxy):
             filename = brightest_galaxy.loc[index,'File_key']
             filename_ix_fs = sn_ix[np.where(fits_summary.loc[sn_ix, "filenameshort"] == filename+".fits")[0]]
             print(f'{filename} {filename_ix_fs}')
+            if len(filename_ix_fs)==0:
+                continue
             if len(filename_ix_fs)>1:
                 raise RuntimeError(f"filename_ix_fs is returning multiple matches for filenameshort in fits_summary: {filename_ix_fs}")
 
@@ -269,6 +272,7 @@ def get_region_commands(index, fits_summary, ellipse_color='red', ellipse_width=
     return cmds, ra_galaxy, dec_galaxy
 
 if __name__ == "__main__":
+
     args = define_args()
 
     # pandas reads the table at the path args.fits_summary_path and then returns it to the variable fits_summary
