@@ -38,26 +38,31 @@ def create_radius_index(root_dir, relative_key, output_csv):
             ra_sn1 = sn1_data.loc[sn1_data['SNID'] == SNID_key, 'RA'].values[0]
             dec_sn1 = sn1_data.loc[sn1_data['SNID'] == SNID_key, 'Dec'].values[0]
 
-            for i in range(len(starcounts)):
-                ra_source = starcounts['ALPHA_J2000'][i]
-                dec_source = starcounts['DELTA_J2000'][i]
-                if ((ra_source - ra_sn1)**2 + (dec_source - dec_sn1)**2 < 5): 
-                    info = {
-                            "SNID": SNID_key,
-                            "File_key": file_key, 
-                            "Galaxy_Key": relative_key,
-                            "RA_Galaxy": ra_source,
-                            "Dec_Galaxy": dec_source,
-                            "Position_Angle": starcounts['THETA_IMAGE'][i],
-                            "Major_Axis": starcounts['A_IMAGE'][i],
-                            "Minor_Axis": starcounts['B_IMAGE'][i],
-                            "Mag": starcounts['MAG_AUTO'][i],
-                            "Mag_Error": starcounts['MAGERR_AUTO'][i],
-                            "Flux": starcounts['FLUX_AUTO'][i],
-                            "Flux_Error": starcounts['FLUXERR_AUTO'][i]
-                            }
-                    data_dict.append(info)
+            valid_filter = pd.read_csv('data_files/fits_cleaned_HST_data.csv')
 
+            try:
+                if valid_filter.loc[valid_filter['File_key']].values == file_key:
+                    for i in range(len(starcounts)):
+                        ra_source = starcounts['ALPHA_J2000'][i]
+                        dec_source = starcounts['DELTA_J2000'][i]
+                        if ((ra_source - ra_sn1)**2 + (dec_source - dec_sn1)**2 < 5): 
+                            info = {
+                                    "SNID": SNID_key,
+                                    "File_key": file_key, 
+                                    "Galaxy_Key": relative_key,
+                                    "RA_Galaxy": ra_source,
+                                    "Dec_Galaxy": dec_source,
+                                    "Position_Angle": starcounts['THETA_IMAGE'][i],
+                                    "Major_Axis": starcounts['A_IMAGE'][i],
+                                    "Minor_Axis": starcounts['B_IMAGE'][i],
+                                    "Mag": starcounts['MAG_AUTO'][i],
+                                    "Mag_Error": starcounts['MAGERR_AUTO'][i],
+                                    "Flux": starcounts['FLUX_AUTO'][i],
+                                    "Flux_Error": starcounts['FLUXERR_AUTO'][i]
+                                    }
+                            data_dict.append(info)
+            except Exception as e:
+                print(f"{file_path} not a valid path")
         except Exception as e:
             print(f"Error reading {file_path}: {e}")
         
