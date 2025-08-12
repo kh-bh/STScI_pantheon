@@ -10,7 +10,9 @@ Step 2. Run download_data.ipynb or download_data.py (make sure to manually chang
 
 Step 3. Run fits_data_table.py
 
-Step 4. Run catalog_extractor.py
+Step 3.5. Run filter_fits_summary.ipynb
+
+Step 4. Extract the source extractor files and run catalog_extractor.py
 
 Step 5. Run extractor_brightest_info_data_table.py and extractor_radius_info_data_table.py
 
