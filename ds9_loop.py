@@ -49,10 +49,10 @@ def define_args():
     )
 
     parser.add_argument(
-        "--brightest_galaxy_path", 
+        "--probable_galaxy_path", 
         type=str, 
-        default=f'{tabledir}/data_collection_files/data_files/brightest_galaxy.csv', 
-        help="Path to the brightest galaxy CSV file (default=%(default)s)"
+        default=f'{tabledir}/data_collection_files/data_files/probable_galaxy_catalog.csv', 
+        help="Path to the probable galaxy CSV file (default=%(default)s)"
     )
 
     parser.add_argument(
@@ -197,13 +197,13 @@ def save_region_file(filepath, output):
             file.write(str(line) + "\n")
     file.close()
 
-#combining fits_summary and brightest_galaxy
-def combine_fs_and_bg(supernova_names, fits_summary, brightest_galaxy):
+#combining fits_summary and probable_galaxy
+def combine_fs_and_bg(supernova_names, fits_summary, probable_galaxy):
     for sn_name in supernova_names:
         print("SN name: ",sn_name)
 
-        sn_ix_bg = brightest_galaxy[brightest_galaxy["SNID"] == sn_name].index.values
-        print("Brightest galaxy indices: ",sn_ix_bg)
+        sn_ix_bg = probable_galaxy[probable_galaxy["SNID"] == sn_name].index.values
+        print("probable galaxy indices: ",sn_ix_bg)
         if len(sn_ix_bg) == 0:
             ######
             print(f'WARNING! could not find indices for galaxy {sn_name}, skipping')
@@ -214,7 +214,7 @@ def combine_fs_and_bg(supernova_names, fits_summary, brightest_galaxy):
         print("Fits summary indices: ",sn_ix)
 
         for index in sn_ix_bg:
-            filename = brightest_galaxy.loc[index,'File_key']
+            filename = probable_galaxy.loc[index,'File_key']
             filename_ix_fs = sn_ix[np.where(fits_summary.loc[sn_ix, "filenameshort"] == filename+".fits")[0]]
             print(f'{filename} {filename_ix_fs}')
             if len(filename_ix_fs)==0:
@@ -222,10 +222,10 @@ def combine_fs_and_bg(supernova_names, fits_summary, brightest_galaxy):
             if len(filename_ix_fs)>1:
                 raise RuntimeError(f"filename_ix_fs is returning multiple matches for filenameshort in fits_summary: {filename_ix_fs}")
 
-            for column_name in brightest_galaxy.columns:
+            for column_name in probable_galaxy.columns:
                 if column_name not in fits_summary.columns:
                     fits_summary[column_name] = np.nan
-                fits_summary.at[filename_ix_fs[0], column_name] = brightest_galaxy.at[index, column_name]
+                fits_summary.at[filename_ix_fs[0], column_name] = probable_galaxy.at[index, column_name]
     return fits_summary
 
 
@@ -291,11 +291,11 @@ if __name__ == "__main__":
 
     print(f'supernova_names: {supernova_names}')
 
-    # reading table at args.brightest_galaxy_path and assigning it to brightest_galaxy variable
-    print (f'Loading brightest galaxy: {args.brightest_galaxy_path}')
-    brightest_galaxy = pd.read_table(args.brightest_galaxy_path,sep=',') #original
+    # reading table at args.probable_galaxy_path and assigning it to probable_galaxy variable
+    print (f'Loading probable galaxy: {args.probable_galaxy_path}')
+    probable_galaxy = pd.read_table(args.probable_galaxy_path,sep=',') #original
 
-    # reading table at args.brightest_galaxy_path and assigning it to brightest_galaxy variable
+    # reading table at args.probable_galaxy_path and assigning it to probable_galaxy variable
     print (f'Loading unmatched_pantheon: {args.unmatched_pantheon_path}')
     unmatched_pantheon = pd.read_table(args.unmatched_pantheon_path,sep=',') #original
     fits_summary = combine_fs_and_up(supernova_names, fits_summary, unmatched_pantheon)
@@ -303,9 +303,9 @@ if __name__ == "__main__":
     # receiving end: the "filenameshort" column in the fits_summary table
     fits_summary['filenameshort'] = fits_summary['filename'].str.replace(r'.*/', '', regex=True)
 
-    # combines fits_summary and brightest_galaxy tables
-    print("Combining fits_summary and brightest_galaxy tables...")
-    fits_summary = combine_fs_and_bg(supernova_names, fits_summary, brightest_galaxy)
+    # combines fits_summary and probable_galaxy tables
+    print("Combining fits_summary and probable_galaxy tables...")
+    fits_summary = combine_fs_and_bg(supernova_names, fits_summary, probable_galaxy)
 
     #print(fits_summary.head().to_string())
     fits_summary_combined_filename = re.sub('\.csv$','_combined.csv',args.fits_summary_path)
