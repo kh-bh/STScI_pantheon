@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
-import sys, os, glob, re
+import sys, os, glob, re ,subprocess, shutil
 import argparse
 import pandas as pd
 import numpy as np
 import math 
 import sep
+from astropy.io import fits
+from pathlib import Path 
+
+
+
+
 def define_args():
     parser = argparse.ArgumentParser(description="Generate DS9 region files", conflict_handler='resolve')
     
@@ -73,6 +79,18 @@ def define_args():
         type=str, 
         default=f'{datadir}', 
         help="Directory where the data is (default=%(default)s)"
+    )
+
+    parser.add_argument(
+        "--download",
+        action="store_true",
+        help="Dowloads and fpacks images into local machine (default=%(default)s)"
+    )
+
+    parser.add_argument(
+        "--look_fpacke_images",
+        action="store_true",
+        help="This displays the fpacked images in ds9 (default=%(default)s)"
     )
 
     return parser.parse_args()
@@ -275,9 +293,53 @@ def get_region_commands(index, fits_summary, ellipse_color='red', ellipse_width=
 
     return cmds, ra_galaxy, dec_galaxy
 
+def fpack_download(fitsfilename, regionfilename, clobber=True, fpack_env="fpack", sci_ext=1, q=4):
+    src = Path(fitsfilename)
+    out_sci = src.with_name(src.stem + "_sci.fits")    # float image
+    out_fz  = Path(str(out_sci) + ".fz")
+
+    # --- read SCI extension as float32; copy header for WCS ---
+    with fits.open(src, memmap=False) as hdul:
+        sci = hdul[sci_ext]
+        data = sci.data.astype(np.float32, copy=True)
+        hdr  = sci.header.copy()
+
+    # OPTIONAL: if you still have NaNs/Infs causing display issues, uncomment:
+    # data = np.nan_to_num(data, nan=0.0, posinf=0.0, neginf=0.0)
+
+    # --- write a PrimaryHDU with NO BSCALE/BZERO (important for fpack) ---
+    fits.HDUList([fits.PrimaryHDU(data=data, header=hdr)]).writeto(out_sci, overwrite=True)
+    print("file created successfully:", out_sci)
+
+    # --- clobber logic for the compressed file ---
+    if out_fz.exists():
+        if clobber:
+            try: out_fz.unlink()
+            except OSError: pass
+        else:
+            try: out_sci.unlink()
+            except OSError: pass
+            return str(out_fz), str(regionfilename)
+
+    # --- run fpack (quantize floats with -q) from the dedicated env ---
+    #cmd = ["conda", "run", "-n", fpack_env, "fpack", "-Y", f"-q{q}", str(out_sci)]
+    cmd = ["conda", "run", "-n", fpack_env, "fpack", "-Y", "-g", "-q", str(q), str(out_sci)]
+
+    print("[fpack]", " ".join(cmd))
+    subprocess.run(cmd, check=True)
+
+    # keep only the .fz
+    try: out_sci.unlink()
+    except OSError: pass
+
+    return str(out_fz), str(regionfilename)
+
+
+
 if __name__ == "__main__":
 
     args = define_args()
+    images_to_download=[]
 
     # pandas reads the table at the path args.fits_summary_path and then returns it to the variable fits_summary
     print (f'Loading fits summary: {args.fits_summary_path}')
@@ -416,7 +478,10 @@ if __name__ == "__main__":
 
             (path1,fname1) = os.path.split(fits_summary.at[index, "filename"])
             (path2,subdir1) = os.path.split(path1)
-            fitsfilename = f'{sn_rootdir}/{subdir1}/{fname1}'
+            if args.look_fpacke_images:
+                fitsfilename = f'{sn_rootdir}/{subdir1}/{fname1[:-5]}_sci.fits.fz'
+            else:
+                fitsfilename = f'{sn_rootdir}/{subdir1}/{fname1}'
 
             #print('bbbb',fitsfilename_old,'\n',fitsfilename)
             #sys.exit(0)
@@ -430,15 +495,25 @@ if __name__ == "__main__":
                 else:
                     print(f'ERROR: fitsfilename {fitsfilename} does not exist!!!')
 
+            if args.look_fpacke_images:
+                regionfilename = re.sub('\.fits$','.reg',fitsfilename[:-12]+'.fits')
+            else:
+                regionfilename = re.sub('\.fits$','.reg',fitsfilename)
 
-            regionfilename = re.sub('\.fits$','.reg',fitsfilename)
             if regionfilename==fitsfilename:
                 raise RuntimeError(f'Could not replace .fits with .reg in {fitsfilename}')
+            
+            # Save region file to output directory instead of original data directory
+            (path1,fname1) = os.path.split(fits_summary.at[index, "filename"])
+            (path2,subdir1) = os.path.split(path1)
+            region_basename = os.path.basename(regionfilename)
+            regionfilename_out = f"{args.out_dir}/{region_basename}"
             
             #filepath_regionfile = f"{args.out_dir}/{fits_summary.at[index, 'File_key']}_region_file.reg"
 
             print('fitsfilename',fitsfilename)
-            print('regionfilename',regionfilename)
+            print('regionfilename (original data dir)',regionfilename)
+            print('regionfilename (output dir)',regionfilename_out)
 
             if not os.path.isfile(fitsfilename):
                 print(f'WARNING!!!!! fitsfile {fitsfilename} does not exist!!!')
@@ -446,12 +521,25 @@ if __name__ == "__main__":
                 continue
 
             relative_fitsfilename = os.path.relpath(fitsfilename, start=sn_rootdir)
-            relative_regionfilename = os.path.relpath(regionfilename, start=sn_rootdir)
+            relative_regionfilename = os.path.relpath(regionfilename_out, start=sn_rootdir)
 
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
 
-            save_region_file(regionfilename, output)
+            save_region_file(regionfilename_out, output)
+
+            if args.download:
+                try:
+                    print('print trying to download',fitsfilename, regionfilename)
+                    packed_path, reg_path = fpack_download(fitsfilename, regionfilename, clobber=True)
+                    images_to_download.extend([packed_path, reg_path])
+                    print(f"[download] created {packed_path}")
+                    print(f"[download] include region {reg_path}")
+
+                except Exception as e:
+                    import traceback; traceback.print_exc()
+                    print(f"[download] skipping {fitsfilename}: {e}")
+                    print(f"images failed to download for {relative_fitsfilename}:{e}")
         
         if sn_name == '1997bq':
             print(fits_summary.loc[sn_ix,['File_key','theta_deg','alpha_deg','PA_deg','pixscale']])
@@ -472,3 +560,27 @@ if __name__ == "__main__":
         f.write(ds9cmds)
     f.close()
 
+ 
+    if args.download and images_to_download:
+        print(images_to_download, 'images to donwload') 
+        manifest = os.path.join(args.out_dir, "download_manifest.txt")
+        print(manifest, 'manifest')
+        with open(manifest, "w") as f:
+             for p in images_to_download:
+                f.write(os.path.abspath(p) + "\n")
+        print(f"\n[download] Wrote manifest: {manifest}")
+
+        # Ready-to-paste commands on YOUR LAPTOP terminal:
+        print("\n=== COPY THESE TO YOUR LAPTOP TERMINAL ===")
+        print("# Option A: rsync using a file list (fast, keeps names)")
+        print(f'DEST="$HOME/HST_quicklook"')
+        print(f'REMOTE="plhstproc6.stsci.edu"')
+        print(f'JUMP="aperturesshduo.stsci.edu:8222"')
+        print('MANIFEST_SERVER="/astro/armin/bhoomika/regionfiles/download_manifest.txt"')
+
+        print(f'mkdir -p $DEST')
+        print(f'scp -o ProxyJump=$JUMP "$REMOTE:$MANIFEST_SERVER" /tmp/manifest_abs.txt')
+        print('rsync -avR -I --progress -e "ssh -J $JUMP" '
+         '--files-from=/tmp/manifest_abs.txt '
+        '"$REMOTE:/" "$DEST/"')
+        print("=== END ===\n")
