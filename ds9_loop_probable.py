@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
-import sys, os, glob, re
+import sys, os, glob, re, subprocess, shutil
 import argparse
 import pandas as pd
 import numpy as np
 import math 
 import sep
+from astropy.io import fits
+from pathlib import Path 
+
+
+
+
 def define_args():
     parser = argparse.ArgumentParser(description="Generate DS9 region files", conflict_handler='resolve')
     
@@ -73,6 +79,12 @@ def define_args():
         type=str, 
         default=f'{datadir}', 
         help="Directory where the data is (default=%(default)s)"
+    )
+
+    parser.add_argument(
+        "--download",
+        action="store_true",
+        help="Dowloads and fpacks images into local machine (default=%(default)s)"
     )
 
     return parser.parse_args()
@@ -275,9 +287,132 @@ def get_region_commands(index, fits_summary, ellipse_color='red', ellipse_width=
 
     return cmds, ra_galaxy, dec_galaxy
 
+
+
+def fpack_download(fitsfilename, regionfilename, clobber=False, scale=100.0):
+    # ensure absolute paths
+    #fitsfilename = os.path.abspath(fitsfilename)
+    #regionfilename = os.path.abspath(regionfilename)
+
+    # build output names (keep your style)
+    outfile = fitsfilename[:-5] + '_sci_int32.fits'   # e.g. *_drz_sci_int32.fits
+    out_fz  = outfile + '.fz'                         # after fpack
+
+    # --- read SCI image (robust selection) ---
+    with fits.open(fitsfilename, memmap=False) as hdul:
+        try:
+            sci = hdul['SCI', 1]            # preferred
+        except Exception:
+            if len(hdul) > 1:
+                sci = hdul[1]               # common DRZ/DRC case
+            else:
+                sci = hdul[0]               # single-HDU fallback
+        data = np.array(sci.data, dtype=np.float32, copy=True)
+        hdr  = sci.header.copy()
+
+    # --- scale to int32 with BSCALE so DS9 still sees floats ---
+    #int_data = np.rint(data * scale).astype(np.int32)
+    phdu = fits.PrimaryHDU()
+    hdu_img = fits.ImageHDU(data, header=hdr)
+    hdu_img.header['BITPIX'] = 32
+    hdu_img.header['BZERO']  = 0.0
+    hdu_img.header['BSCALE'] = 1.0/scale
+    fits.HDUList([phdu, hdu_img]).writeto(outfile, overwrite=True)
+
+    if os.path.exists(outfile):
+        print('file created successfully:', outfile)
+   
+       # 2) If .fz already exists, decide whether to reuse or clobber
+    if os.path.exists(out_fz):
+        if clobber:
+            try:
+                os.unlink(out_fz)
+            except OSError:
+                pass
+        else:
+            # Reuse existing compressed file
+            # Clean up the temporary uncompressed file and return
+            try:
+                os.unlink(outfile)
+            except OSError:
+                pass
+            return out_fz, regionfilename
+
+    # 3) Run fpack via the dedicated env
+    try:
+        subprocess.run(
+            ["conda", "run", "-n", "fpack", "fpack", "-Y", outfile],
+            check=True
+        )
+    except subprocess.CalledProcessError as e:
+        # If fpack complained but the .fz exists anyway, treat as success
+        if os.path.exists(out_fz):
+            print(f"[fpack] non-zero exit ({e.returncode}) but {out_fz} exists; using it.")
+        else:
+            # real failure -> re-raise so caller can skip this file
+            raise
+
+    # 4) Remove the temporary uncompressed file
+    try:
+        os.unlink(outfile)
+    except OSError:
+        pass
+
+    # return both files so the caller can add to the manifest
+    return out_fz, regionfilename
+
+
+
+
+
+
+def fpack_download2(fitsfilename, relative_regionfilename):
+    # 1) Read SCI HDU (usually ext=1), keep its header (contains WCS)
+    print(fitsfilename, 'fitsfilename')
+    outfile = fitsfilename[:-5]+'sci.fits'
+    out_fz = fitsfilename[:-5]+'sci.fz'
+
+    with fits.open(fitsfilename, memmap=False) as hdul:
+        sci = hdul[1]    # or hdul['SCI',1]
+        print('sci data:', sci)
+        data = sci.data.astype(np.float32).copy()
+        hdr  = sci.header.copy()
+
+    # 2) Choose a scale (here 100 -> 0.01 precision)
+    scale = 100.0
+    int_data = np.round(data * scale).astype(np.int32)
+
+    # 3) Write as integer with BSCALE/BZERO so viewers recover floats = int*BSCALE+BZERO
+    hdu_img = fits.ImageHDU(int_data, header=hdr)
+    hdu_img.header['BITPIX'] = 32
+    hdu_img.header['BZERO']  = 0.0
+    hdu_img.header['BSCALE'] = 1.0/scale
+    # (optional) clarify units
+    if 'BUNIT' in hdu_img.header:
+        hdu_img.header['BUNIT'] = hdu_img.header['BUNIT']  # unchanged physically, scaling is via BSCALE
+
+    # Add a minimal PRIMARY HDU (no data)
+    phdu = fits.PrimaryHDU()
+    fits.HDUList([phdu, hdu_img]).writeto(outfile, overwrite=True)
+    if outfile.exists():
+        print('file created succesfully' , outfile)
+    if shutil.which("fpack") is None:
+        raise RuntimeError("fpack not found in PATH on the server")
+    subprocess.rn(["fpack", "-Y", str(outfile)], check =True)
+
+    #to delete the science image
+    if out_fz.exists():
+        try: outfile.unlin()
+        except Exception: pass
+
+    return str(out_fz)
+
+
 if __name__ == "__main__":
 
     args = define_args()
+    images_to_download=[]
+
 
     # pandas reads the table at the path args.fits_summary_path and then returns it to the variable fits_summary
     print (f'Loading fits summary: {args.fits_summary_path}')
@@ -452,6 +587,19 @@ if __name__ == "__main__":
             print(ds9cmd)
 
             save_region_file(regionfilename, output)
+
+            if args.download:
+                try:
+                    print('print trying to download',fitsfilename, regionfilename)
+                    packed_path, reg_path = fpack_download(fitsfilename, regionfilename)
+                    images_to_download.extend([packed_path, reg_path])
+                    print(f"[download] created {packed_path}")
+                    print(f"[download] include region {reg_path}")
+
+                except Exception as e:
+                    import traceback; traceback.print_exc()
+                    print(f"[download] skipping {fitsfilename}: {e}")
+                    print(f"images failed to download for {relative_fitsfilename}:{e}")
         
         if sn_name == '1997bq':
             print(fits_summary.loc[sn_ix,['File_key','theta_deg','alpha_deg','PA_deg','pixscale']])
@@ -471,4 +619,25 @@ if __name__ == "__main__":
     with open(ds9cmd_filename, "w") as f:
         f.write(ds9cmds)
     f.close()
+     
+    print(images_to_download, 'images to donwload') 
+    if args.download and images_to_download:
+        manifest = os.path.join(args.out_dir, "download_manifest.txt")
+        print(manifest, 'manifest')
+        with open(manifest, "w") as f:
+             for p in images_to_download:
+                f.write(os.path.abspath(p) + "\n")
+        print(f"\n[download] Wrote manifest: {manifest}")
 
+        # Ready-to-paste commands on YOUR LAPTOP terminal:
+        print("\n=== COPY THESE TO YOUR LAPTOP TERMINAL ===")
+        print("# Option A: rsync using a file list (fast, keeps names)")
+        print('mkdir -p ~/HST_quicklook')
+        print(f'rsync -av --info=progress2 -e "ssh -J aperturesshduo.stsci.edu:8222" '
+          f'--files-from="{manifest}" plhstproc6.stsci.edu:/ ~/HST_quicklook/')
+        print("\n# Option B: loop over files (if rsync with --files-from is blocked):")
+        print('while IFS= read -r p; do '
+          'scp -o ProxyJump=aperturesshduo.stsci.edu:8222 '
+          '"plhstproc6.stsci.edu:${p}" ~/HST_quicklook/ ; '
+          f'done < "{manifest}"')
+        print("=== END ===\n")
