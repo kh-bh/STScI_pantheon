@@ -526,8 +526,6 @@ if __name__ == "__main__":
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
 
-            save_region_file(regionfilename_out, output)
-
             if args.download:
                 try:
                     print('print trying to download',fitsfilename, regionfilename)
@@ -540,6 +538,13 @@ if __name__ == "__main__":
                     import traceback; traceback.print_exc()
                     print(f"[download] skipping {fitsfilename}: {e}")
                     print(f"images failed to download for {relative_fitsfilename}:{e}")
+                    continue
+            try:
+                save_region_file(regionfilename_out, output)
+            except Exception as e:
+                print(f"[download] skipping {fitsfilename}: {e}")
+                print(f"images failed to download for {relative_fitsfilename}:{e}")
+                continue
         
         if sn_name == '1997bq':
             print(fits_summary.loc[sn_ix,['File_key','theta_deg','alpha_deg','PA_deg','pixscale']])
