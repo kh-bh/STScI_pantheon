@@ -26,6 +26,9 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
     - output_csv: str, name of output CSV file (defaults to corrected_mag.csv)
     - recursive: bool, whether to search subdirectories inside each SNID folder (defaults to TRUE)
     """
+    
+    # Initialize zp_ab with default value
+    zp_ab = 0
 
     for snid in snid_list:
         folder_path = os.path.join(base_path, snid)
@@ -44,7 +47,21 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                     phot_plam = header.get("PHOTPLAM")
                     filter = header.get("FILTER")
 
-                    zp_ab = -2.5 * np.log10(phot_flam) - 5 * np.log10(phot_plam) - 2.408
+                    # Debug: Print header values
+                    print(f"File: {file_path}")
+                    print(f"  PHOTFLAM: {phot_flam}")
+                    print(f"  PHOTPLAM: {phot_plam}")
+                    print(f"  PHOTMODE: {phot_mode}")
+                    print(f"  FILTER: {filter}")
+                    
+                    # Check if required values are present before calculating zp_ab
+                    if phot_flam is not None and phot_plam is not None and phot_flam > 0 and phot_plam > 0:
+                        zp_ab = -2.5 * np.log10(phot_flam) - 5 * np.log10(phot_plam) - 2.408
+                        print(f"  Calculated zp_ab: {zp_ab}")
+                    else:
+                        print(f"Warning: Missing or invalid PHOTFLAM or PHOTPLAM in {file_path}")
+                        print(f"  PHOTFLAM: {phot_flam}, PHOTPLAM: {phot_plam}")
+                        zp_ab = 0
 
                     info = {
                         "SNID": snid,
@@ -63,8 +80,10 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                 print(f"Error: {e}")
     # Convert to DataFrame and export
     df = pd.DataFrame(data_list)
-    df.to_csv(output_csv, index=False)
-    print(f"CSV exported: {output_csv}")
+    if output_csv is not None:
+        df.to_csv(output_csv, index=False)
+        print(f"CSV exported: {output_csv}")
+    return zp_ab
 
 def get_snid_folders(base_path="source_extractor"):
     """
