@@ -1,144 +1,159 @@
 
-cd ./pantheon_data_folder/1999by/mastDownload/HST 
+cd ./pantheon_data_folder/2006ef/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/1980N/mastDownload/HST 
+cd ./pantheon_data_folder/Sasquatch/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/13411/mastDownload/HST 
+cd ./pantheon_data_folder/1995al/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/trajan/mastDownload/HST 
+cd ./pantheon_data_folder/04D2mh/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/17886/mastDownload/HST 
+cd ./pantheon_data_folder/Borg/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/6057/mastDownload/HST 
+cd ./pantheon_data_folder/1997cn/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/1994ae/mastDownload/HST 
+cd ./pantheon_data_folder/Qiqirn/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2013fa/mastDownload/HST 
+cd ./pantheon_data_folder/rutledge/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2021pit/mastDownload/HST 
+cd ./pantheon_data_folder/530251/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2002dp/mastDownload/HST 
+cd ./pantheon_data_folder/500038/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/PSNJ0107203/mastDownload/HST 
+cd ./pantheon_data_folder/wilson/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2005cf/mastDownload/HST 
+cd ./pantheon_data_folder/Jay/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/470041/mastDownload/HST 
+cd ./pantheon_data_folder/AT2017dfq/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/vespasian/mastDownload/HST 
+cd ./pantheon_data_folder/1998aq/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/06D2gb/mastDownload/HST 
+cd ./pantheon_data_folder/14871/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2010Y/mastDownload/HST 
+cd ./pantheon_data_folder/2012ij/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2008ec/mastDownload/HST 
+cd ./pantheon_data_folder/2008L/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/1998dh/mastDownload/HST 
+cd ./pantheon_data_folder/2005W/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/05D2ah/mastDownload/HST 
+cd ./pantheon_data_folder/geta/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/450082/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2012cg/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/1997/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/18241/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/04D1sa/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/05D3jr/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/550202/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/Elvis/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2019ein/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2019np/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/490521/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/520188/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/ASASSN-16ip/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2002jg/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/1998bu/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/iPTF13ebh/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2010el/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2006bh/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2008bc/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2009le/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2014bv/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2008hv/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2008ia/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/1997bp/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2018gv/mastDownload/HST 
+ ds9 -zscale 
+
+cd ./pantheon_data_folder/2013dy/mastDownload/HST 
  ds9 -zscale 
 
 cd ./pantheon_data_folder/06D3ed/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2002cf/mastDownload/HST 
+cd ./pantheon_data_folder/2010gp/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/Greenburg/mastDownload/HST 
+cd ./pantheon_data_folder/2005ke/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/1999cp/mastDownload/HST 
+cd ./pantheon_data_folder/2002cs/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2008ge/mastDownload/HST 
+cd ./pantheon_data_folder/2006X/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/2001bg/mastDownload/HST 
+cd ./pantheon_data_folder/ASASSN-16ci/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/garner/mastDownload/HST 
+cd ./pantheon_data_folder/2008fv/mastDownload/HST 
  ds9 -zscale 
 
-cd ./pantheon_data_folder/Primo/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2016coj/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/SCP05D0/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/03D3cd/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2007af/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2006dd/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/1999dq/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/480162/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/510457/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/440236/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/Ferguson/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2003gq/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/stone/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/520062/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2015bo/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2009Y/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2002fb/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2561/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2017erp/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2009ig/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/2005mz/mastDownload/HST 
- ds9 -zscale 
-
-cd ./pantheon_data_folder/440005/mastDownload/HST 
+cd ./pantheon_data_folder/SN2016gfr/mastDownload/HST 
  ds9 -zscale 

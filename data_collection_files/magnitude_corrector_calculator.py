@@ -8,11 +8,11 @@ import numpy as np
 
 
 def main():
-    snids = get_snid_folders(base_path= '/astro/armin/bhoomika/source_extractor')
+    snids = get_snid_folders(base_path= '/astro/armin/bhoomika/source_extractor')[0:2]
     print(len(snids))
     extract_fits_by_snid(snids,
                          base_path= '/astro/armin/bhoomika/pantheon_data_folder',
-                         output_csv= 'magnitude_calculated.csv',
+                         output_csv= 'magnitude_calculated_este_test.csv',
                          recursive=True)
 
 
@@ -37,8 +37,9 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
 
         for file_path in file_paths:
             try:
-                
+                print('file_path', file_path, 'is being opened')
                 with fits.open(file_path) as hdul:
+                    print('hdul', hdul)
                     
                     header = hdul[0].header
                     phot_mode = header.get("PHOTMODE")

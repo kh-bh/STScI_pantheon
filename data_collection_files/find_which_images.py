@@ -24,11 +24,18 @@ def get_coordinates(fitsfile,rr=None,dd=None, verbose=False):
         w = WCS(hdul[1].header)
         coords = SkyCoord(rr, dd, unit='deg')
         # Convert to pixel coordinates
-        x, y = w.world_to_pixel(coords)
+        try:
+            x, y = w.world_to_pixel(coords)
+            print(f"Successfully converted: RA={rr}, Dec={dd} -> x={x}, y={y}")
+        except Exception as e:
+            print(f"WCS conversion failed for {img}: {e}")
+            print(f"RA={rr}, Dec={dd}")
+            status = False
+            return(0, 0, status)
         if ((x <= 0) |
             (y <= 0) |
-            (x > w.pixel_shape[0]) |
-            (x > w.pixel_shape[0])
+            (x > w.pixel_shape[1]) |  # x should be compared to width (shape[1])
+            (y > w.pixel_shape[0])    # y should be compared to height (shape[0])
             ): 
             if verbose: print(f"Filename: %s, Pixel coordinates: x=%.2f, y=%.2f (off axis)" %(img, x, y))
             status = False
@@ -39,20 +46,21 @@ def get_coordinates(fitsfile,rr=None,dd=None, verbose=False):
 
 def get_counts(fitsfile,xx=None,yy=None, box=100):
     image_data = fits.getdata(fitsfile, ext=1)
-    region = image_data[int(xx-0.5*box):int(xx+0.5*box),
-                        int(yy-0.5*box):int(y+0.5*box)]
+    region = image_data[int(yy-0.5*box):int(yy+0.5*box),  # Note: y is first dimension
+                        int(xx-0.5*box):int(xx+0.5*box)]  # Note: x is second dimension
     return(region.sum())
 
 
 
 if __name__=='__main__':
-    '''
-    datatable = 'pantheon_fits_cleand_hst_data.csv'
+
+    #datatable = 'pantheon_fits_cleand_hst_data.csv'
+    datatable = 'data_collection_files/data_files/fits_cleaned_JWST_data.csv'
     df = pd.read_csv(datatable)
     verbose =False
 
     ## coordtable = 'probable_galaxy_catalog.csv'
-    coordtable = 'unmatched_pantheon.csv'
+    coordtable = 'data_collection_files/data_files/unmatched_pantheon.csv'
     tf = pd.read_csv(coordtable)
     
     for index, rw in df.iterrows():
@@ -80,18 +88,37 @@ if __name__=='__main__':
 
     of = df[df.On_Image==True]                
     of=of.reset_index()                        
-    outab = 'out_table.csv'
-    outtab = 'data_collection_files/table_sn_in_images.csv'
-    if os.path.isfile(outab): os.remove(outab)
-    of.to_csv(outab)
-    '''
+    #outab = 'out_table.csv'
+    # outab = 'data_collection_files/JWST_table_sn_in_images.csv'
+    # if os.path.isfile(outab): os.remove(outab)
+    # of.to_csv(outab)
+
+    #merge of table with 'data_collection_files/data_files/reduced_table_sn_in_images.csv' table
+
+    
     #load the HST_table_sn_im_checklist.csv and merge with the out_table.csv
     sn_in_images = pd.read_csv('data_collection_files/data_files/table_sn_in_images.csv')
     all_sn = pd.read_csv('data_collection_files/data_files/HST_table_sn_im_checklist.csv')
     #merge the two tables on the SNID column
-    merged_table = pd.merge(sn_in_images, all_sn, on='filename', how='left')
-    print(merged_table.head())
+    #merged_table = pd.merge(sn_in_images, all_sn, on='filename', how='left')
+    
     #save the merged table
-    merged_table.to_csv('data_collection_files/data_files/reduced_table_sn_in_images.csv', index=False)
+    #merged_table.to_csv('data_collection_files/data_files/reduced_table_sn_in_images.csv', index=False)
+
+    #load the reduced_table_sn_in_images.csv
+    merged_table = pd.read_csv('data_collection_files/data_files/reduced_table_sn_in_images.csv')
+    # Reset index to ensure sequential indices (0, 1, 2, 3...)
+    merged_table = merged_table.reset_index(drop=True)
+    #chnage the name of the colums that end with _x to the original name without _x
+    merged_table = merged_table.rename(columns={col: col.replace('_y', '') for col in merged_table.columns if col.endswith('_y')})
+    #drop the columns that end with _x or _y
+    
+    merged_table = merged_table.drop(columns=[col for col in merged_table.columns if col.endswith('_x') or col.endswith('_y')])
+
+    
+    # Concatenate the cleaned table with the 'of' table (add of at the bottom)
+    jwst_hst_table = pd.concat([merged_table, of], ignore_index=True)
+    # Append to the existing file instead of overwriting
+    jwst_hst_table.to_csv('data_collection_files/data_files/reduced_table_sn_in_images.csv', index=False, mode='a')
 
 

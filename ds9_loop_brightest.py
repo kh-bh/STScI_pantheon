@@ -39,12 +39,21 @@ def define_args():
         help="List of supernova names to process."
     )
 
-    print('GGGGGG',tabledir)
+    #print('GGGGGG',tabledir)
+    parser.add_argument(
+        "--telescope",
+        type=str,
+        choices=['HST', 'JWST'],
+        default='HST',
+        help="Choose telescope data: HST or JWST (default=%(default)s)"
+    )
+    
     parser.add_argument(
         "--fits_summary_path", 
         type=str, 
-        default=f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv', 
-        help="Path to the FITS summary CSV file (default=%(default)s)"
+        help="Path to the FITS summary CSV file (if not provided, will use telescope-specific default)"
+        #default=f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv', 
+        
     )
 
     parser.add_argument(
@@ -142,7 +151,30 @@ def get_region_info2(table):
         cyy = row['CYY']
         cxy = row['CXY']
 
+        # Skip rows with NaN values
+        try:
+            if pd.isna(cxx) or pd.isna(cyy) or pd.isna(cxy):
+                #print(f"Skipping row {ix} due to NaN values: cxx={cxx}, cyy={cyy}, cxy={cxy}")
+                continue
+        except:
+            # If we can't check for NaN, skip this row
+            #print(f"Skipping row {ix} due to invalid values: cxx={cxx}, cyy={cyy}, cxy={cxy}")
+            continue
+            
         (a, b, theta_rad) = sep.ellipse_axes(cxx, cyy, cxy)
+        
+        # Convert numpy arrays to scalars if they contain single values
+        #print(f"DEBUG: Before conversion - a: {a} (type: {type(a)}), b: {b} (type: {type(b)})")
+        if isinstance(a, np.ndarray):
+            a = float(a.item()) if a.size == 1 else a[0]
+            #print(f"DEBUG: Converted a to: {a} (type: {type(a)})")
+        if isinstance(b, np.ndarray):
+            b = float(b.item()) if b.size == 1 else b[0]
+            #print(f"DEBUG: Converted b to: {b} (type: {type(b)})")
+        if isinstance(theta_rad, np.ndarray):
+            theta_rad = float(theta_rad.item()) if theta_rad.size == 1 else theta_rad[0]
+            #print(f"DEBUG: Converted theta_rad to: {theta_rad} (type: {type(theta_rad)})")
+            
         table.loc[ix,'a_pixels'] = a
         table.loc[ix,'b_pixels'] = b
 
@@ -168,8 +200,11 @@ def get_region_info2(table):
 
         #a_arcsec = a*pixscale
         #b_arcsec = b*pixscale
-        a_arcsec = a * pixscale * row["Kron_Radius"]
-        b_arcsec = b * pixscale * row["Kron_Radius"]
+        # Convert Kron_Radius to float if it's a string
+        kron_radius = float(row["Kron_Radius"]) if isinstance(row["Kron_Radius"], str) else row["Kron_Radius"]
+        #print(f"DEBUG: Before multiplication - a: {a} (type: {type(a)}), pixscale: {pixscale} (type: {type(pixscale)}), Kron_Radius: {kron_radius} (type: {type(kron_radius)})")
+        a_arcsec = a * pixscale * kron_radius
+        b_arcsec = b * pixscale * kron_radius
  
 
 
@@ -341,6 +376,21 @@ if __name__ == "__main__":
     args = define_args()
     images_to_download=[]
 
+    # Set default fits_summary_path based on telescope choice if not provided
+    if args.fits_summary_path is None:
+        #Get tabledir from environment or use current directory (same logic as in define_args)
+        if 'MASS_STEP_TABLES_ROOTDIR' in os.environ:
+            tabledir = os.path.abspath(f'{os.environ["MASS_STEP_TABLES_ROOTDIR"]}')
+        else:
+            tabledir = '.'
+            
+        if args.telescope.upper() == 'HST':
+            args.fits_summary_path = f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv'
+        elif args.telescope.upper() == 'JWST':
+            args.fits_summary_path = f'{tabledir}/data_collection_files/data_files/fits_cleaned_JWST_data.csv'
+        else:
+            raise ValueError(f"Invalid telescope choice: {args.telescope}. Must be 'HST' or 'JWST'")
+
     # pandas reads the table at the path args.fits_summary_path and then returns it to the variable fits_summary
     print (f'Loading fits summary: {args.fits_summary_path}')
     fits_summary = pd.read_table(args.fits_summary_path,sep=',') #original
@@ -399,8 +449,17 @@ if __name__ == "__main__":
         all_output = ['global color=blue dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1']
         all_output.append('fk5')
         
-        #sn_rootdir = f'{args.datadir}/source_extractor/{sn_name}'
-        sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        if args.telescope == 'HST':
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        elif args.telescope == 'JWST':
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/JWST'
+        else:
+            raise ValueError(f"Invalid telescope choice: {args.telescope}. Must be 'HST' or 'JWST'")
+
+
+        #sn_rootdir = f'{args.datadir}/source_extractor/{sn_name}/mastDownload/JWST'
+        #sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        #sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/JWST'
 
         ds9cmd = f'\ncd {sn_rootdir} \n ds9 -zscale '
 
@@ -415,9 +474,9 @@ if __name__ == "__main__":
         green_ellipse_list=[]
         for index in sn_ix:
 
-            if fits_summary.loc[index,"Telescope"]=='JWST':
-                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
-                continue
+            # if fits_summary.loc[index,"Telescope"]=='JWST':
+            #     print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+            #     continue
 
             if fits_summary.loc[index,"Filter"]=='detection':
                 print(f'WARNING! skipping since filter={fits_summary.loc[index,"Filter"]}')
@@ -444,9 +503,9 @@ if __name__ == "__main__":
 
         for index in sn_ix:
 
-            if fits_summary.loc[index,"Telescope"]=='JWST':
-                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
-                continue
+            # if fits_summary.loc[index,"Telescope"]=='JWST':
+            #     print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+            #     continue
 
             if fits_summary.loc[index,"Filter"]=='detection':
                 print(f'WARNING! skipping since filter={fits_summary.loc[index,"Filter"]}')
@@ -525,7 +584,7 @@ if __name__ == "__main__":
 
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
-
+ 
             if args.download:
                 try:
                     print('print trying to download',fitsfilename, regionfilename)
