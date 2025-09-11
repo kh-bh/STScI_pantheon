@@ -9,6 +9,7 @@ from pathlib import Path
 def main():
 
     snids = get_snid_folders(base_path="/astro/armin/bhoomika/pantheon_data_folder")
+    #snids =['2009Y']
     print(len(snids))
     extract_fits_by_snid(snids,base_path="/astro/armin/bhoomika/pantheon_data_folder", output_csv="fits_summary.csv", recursive=True)
 
@@ -51,10 +52,10 @@ def extract_fits_by_snid(snid_list, base_path="pantheon_data_folder", output_csv
                         "Telescope": header.get("TELESCOP"),
                         "Instrument": detector,
                         "Filter": filter,
-                        "CD1_1": header_2.get("CD1_1"),
-                        "CD1_2": header_2.get("CD1_2"),
-                        "CD2_1": header_2.get("CD2_1"),
-                        "CD2_2": header_2.get("CD2_2")
+                        "CD1_1": header_2.get("CD1_1") if header_2.get("CD1_1") is not None else (header_2.get("PC1_1") * header_2.get("CDELT1") if header_2.get("PC1_1") is not None and header_2.get("CDELT1") is not None else None),
+                        "CD1_2": header_2.get("CD1_2") if header_2.get("CD1_2") is not None else (header_2.get("PC1_2") * header_2.get("CDELT1") if header_2.get("PC1_2") is not None and header_2.get("CDELT1") is not None else None),
+                        "CD2_1": header_2.get("CD2_1") if header_2.get("CD2_1") is not None else (header_2.get("PC2_1") * header_2.get("CDELT2") if header_2.get("PC2_1") is not None and header_2.get("CDELT2") is not None else None),
+                        "CD2_2": header_2.get("CD2_2") if header_2.get("CD2_2") is not None else (header_2.get("PC2_2") * header_2.get("CDELT2") if header_2.get("PC2_2") is not None and header_2.get("CDELT2") is not None else None)
                     }
 
                     data_list.append(info)
