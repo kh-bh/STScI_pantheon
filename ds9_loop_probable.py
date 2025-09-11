@@ -142,7 +142,26 @@ def get_region_info2(table):
         cyy = row['CYY']
         cxy = row['CXY']
 
+        # Skip rows with NaN values
+        try:
+            if pd.isna(cxx) or pd.isna(cyy) or pd.isna(cxy):
+                print(f"Skipping row {ix} due to NaN values: cxx={cxx}, cyy={cyy}, cxy={cxy}")
+                continue
+        except:
+            # If we can't check for NaN, skip this row
+            print(f"Skipping row {ix} due to invalid values: cxx={cxx}, cyy={cyy}, cxy={cxy}")
+            continue
+            
         (a, b, theta_rad) = sep.ellipse_axes(cxx, cyy, cxy)
+        
+        # Convert numpy arrays to scalars if they contain single values
+        if isinstance(a, np.ndarray):
+            a = float(a.item()) if a.size == 1 else a[0]
+        if isinstance(b, np.ndarray):
+            b = float(b.item()) if b.size == 1 else b[0]
+        if isinstance(theta_rad, np.ndarray):
+            theta_rad = float(theta_rad.item()) if theta_rad.size == 1 else theta_rad[0]
+            
         table.loc[ix,'a_pixels'] = a
         table.loc[ix,'b_pixels'] = b
 
@@ -599,7 +618,7 @@ if __name__ == "__main__":
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
 
-            save_region_file(regionfilename, output)
+            #save_region_file(regionfilename, output)
 
             if args.download:
                 try:
@@ -613,6 +632,13 @@ if __name__ == "__main__":
                     import traceback; traceback.print_exc()
                     print(f"[download] skipping {fitsfilename}: {e}")
                     print(f"images failed to download for {relative_fitsfilename}:{e}")
+
+            try:
+                save_region_file(regionfilename_out, output)
+            except Exception as e:
+                print(f"[download] skipping {fitsfilename}: {e}")
+                print(f"images failed to download for {relative_fitsfilename}:{e}")
+                continue
         
         if sn_name == '1997bq':
             print(fits_summary.loc[sn_ix,['File_key','theta_deg','alpha_deg','PA_deg','pixscale']])

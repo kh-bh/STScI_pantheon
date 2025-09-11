@@ -15,7 +15,8 @@ def create_brightest_index(root_dir, relative_key, output_csv):
         dict: A dictionary where keys are relative paths to .cat files,
               and values are dictionaries of the first data row.
     """
-    valid_filter = pd.read_csv('/home/bkhatri/STScI_pantheon_Github/data_collection_files/data_files/fits_cleaned_HST_data.csv')
+    #valid_filter = pd.read_csv('/home/bkhatri/STScI_pantheon_Github/data_collection_files/data_files/fits_cleaned_HST_data.csv')
+    valid_filter = pd.read_csv('/home/epadill/photometry_ds9/STScI_pantheon/data_collection_files/data_files/fits_cleaned_JWST_data.csv')
     i = 0
     data_dict = []
     SNID = valid_filter['SNID']
@@ -61,15 +62,17 @@ def create_brightest_index(root_dir, relative_key, output_csv):
                 print(f'{file_path} DOES NOT EXIST')
         # Convert to DataFrame and export
         if i%10 == 0:
-            df = pd.DataFrame(data_dict)
-            df.to_csv(output_csv, index=False)
+            new_data = pd.DataFrame(data_dict[-10:])  # Only the last 10 entries
+            new_data.to_csv(output_csv, index=False, mode='a', header=False)
+            #df = pd.DataFrame(data_dict)
+            #df.to_csv(output_csv, index=False)
             print(i)
         
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
     
     df = pd.DataFrame(data_dict)
-    df.to_csv(output_csv, index=False)
+    df.to_csv(output_csv, index=False, mode='a')
     print(f"CSV exported: {output_csv}")
     return data_dict
 
@@ -82,4 +85,4 @@ if __name__== "__main__":
     #root_dir = os.path.join(home_dir, 'source_extractor')
     #print(root_dir)
     relative_key = 0
-    create_brightest_index(source_extractor_path, relative_key, "brightest_galaxy.csv")
+    create_brightest_index(source_extractor_path, relative_key, "data_collection_files/data_files/brightest_galaxy.csv")

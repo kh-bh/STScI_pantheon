@@ -72,13 +72,15 @@ def create_prob_index(root_dir, output_csv, top_range = 0, bottom_range = 0):
         dict: A dictionary where keys are relative paths to .cat files,
               and values are dictionaries of the first data row.
     """
-    valid_filter = pd.read_csv('/home/bkhatri/STScI_pantheon_Github/data_collection_files/data_files/fits_cleaned_HST_data.csv')
+    #valid_filter = pd.read_csv('/home/bkhatri/STScI_pantheon_Github/data_collection_files/data_files/fits_cleaned_HST_data.csv')
+    valid_filter = pd.read_csv('/home/epadill/photometry_ds9/STScI_pantheon/data_collection_files/data_files/fits_cleaned_JWST_data.csv')
     imfile = valid_filter['filename']
     SNID = valid_filter['SNID']
     file_key = valid_filter['File_key']
     data_dict = []
     skipped_index_dict = []
-    sn1_data = pd.read_csv('/home/bkhatri/STScI_pantheon_Github/data_collection_files/data_files/unmatched_pantheon.csv')
+    #sn1_data = pd.read_csv('/home/bkhatri/STScI_pantheon_Github/data_collection_files/data_files/unmatched_pantheon.csv')
+    sn1_data = pd.read_csv('/home/epadill/photometry_ds9/STScI_pantheon/data_collection_files/data_files/unmatched_pantheon.csv')
     i = 0
     index_on = bottom_range - 1
 
@@ -106,7 +108,12 @@ def create_prob_index(root_dir, output_csv, top_range = 0, bottom_range = 0):
             w = WCS(hdul[1].header)
             coords = SkyCoord(rr, dd, unit='deg')
             # Convert to pixel coordinates
-            xx, yy = w.world_to_pixel(coords)
+            try:
+                 xx, yy = w.world_to_pixel(coords)
+            except Exception as e:
+                print(f"WCS conversion failed for {imfile[index]}: {e}")
+                print(f"RA={rr}, Dec={dd}")
+                continue
         print(i)
         path = glob.glob(os.path.join(root_dir, SNID[index], file_key[index], '*.cat'), recursive=True)
         try:
@@ -123,6 +130,13 @@ def create_prob_index(root_dir, output_csv, top_range = 0, bottom_range = 0):
             df['RE']= df['KRON_RADIUS']*sqrt(xp**2.+yp**2.)
             df['d_DLR']=df['OFFSET']/df['RE']
 
+            # Filter sources by d_DLR threshold to speed up processing
+            d_dlr_threshold = 10.0  # Only process sources with d_DLR < 10
+            original_count = len(df)
+            df = df[df['d_DLR'] < d_dlr_threshold].reset_index(drop=True)
+            
+            print(f"Processing {len(df)} sources (filtered from {original_count} total sources)")
+
             df=df.sort_values(by='OFFSET', ignore_index=True)
 
             for nn in list([1,2,4]):
@@ -134,6 +148,7 @@ def create_prob_index(root_dir, output_csv, top_range = 0, bottom_range = 0):
                 df['F_HOST_%d'%nn]=f_hosts
             ## pdb.set_trace()
             df=df.sort_values(by='F_HOST_4', ignore_index=True, ascending=False)
+            
             probable = 0
             info = {
                     "SNID": SNID[index],
@@ -178,10 +193,10 @@ def create_prob_index(root_dir, output_csv, top_range = 0, bottom_range = 0):
 
     
 if __name__=='__main__':
-    tr = int(sys.argv[1])
-    br = int(sys.argv[2])
+    tr = 0#int(sys.argv[1])
+    br = 0#int(sys.argv[2])
     source_extractor_path = "/astro/armin/bhoomika/source_extractor"
     #root_dir = os.path.join(home_dir, 'source_extractor')
     #print(root_dir)
     relative_key = 0
-    create_prob_index(source_extractor_path, 'probable_galaxy_catalog.csv',tr, br)
+    create_prob_index(source_extractor_path, 'data_collection_files/data_files/probable_galaxy_catalog.csv',tr, br)
