@@ -646,7 +646,7 @@ if __name__ == "__main__":
                 continue
 
             relative_fitsfilename = os.path.relpath(fitsfilename, start=sn_rootdir)
-            relative_regionfilename = os.path.relpath(regionfilename, start=sn_rootdir)
+            relative_regionfilename = os.path.relpath(regionfilename_out, start=sn_rootdir)
 
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
