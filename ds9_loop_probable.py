@@ -93,6 +93,14 @@ def define_args():
         help="This displays the fpacked images in ds9 (default=%(default)s)"
     )
 
+    parser.add_argument(
+        "--telescope",
+        type=str,
+        choices=['HST', 'JWST', 'both'],
+        default='HST',
+        help="Telescope to process (default=%(default)s)"
+    )
+
     return parser.parse_args()
 
 
@@ -141,6 +149,7 @@ def get_region_info2(table):
         cxx = row['CXX']
         cyy = row['CYY']
         cxy = row['CXY']
+        print(f'cxx={cxx}, cyy={cyy}, cxy={cxy}')
 
         # Skip rows with NaN values
         try:
@@ -179,7 +188,7 @@ def get_region_info2(table):
         #print (f'alpha_deg {alpha_deg}')
 
         # Pixel scale (arcsec/pixel)
-        pixscale = 3600.0 * np.sqrt(math.fabs((row['CD1_1']*row['CD2_2']) - row['CD1_2']*row['CD2_1']))
+        pixscale = 3600.0 * np.sqrt(math.fabs(row['CD1_1']*row['CD2_2'] - row['CD1_2']*row['CD2_1']))
         #pixscale = 3600.0 * np.sqrt(CD1_1*CD2_2 - CD1_2*CD2_1)
         table.loc[ix,'pixscale'] = pixscale
 
@@ -439,6 +448,14 @@ if __name__ == "__main__":
     args = define_args()
     images_to_download=[]
 
+    # Set telescope-specific file paths
+    if args.telescope == 'JWST':
+        if 'fits_cleaned_HST_data.csv' in args.fits_summary_path:
+            args.fits_summary_path = args.fits_summary_path.replace('fits_cleaned_HST_data.csv', 'fits_cleaned_JWST_data.csv')
+        elif 'fits_cleaned_JWST_data.csv' not in args.fits_summary_path:
+            # If no specific path provided, use JWST default
+            tabledir = os.path.abspath('.') if 'MASS_STEP_TABLES_ROOTDIR' not in os.environ else os.path.abspath(os.environ["MASS_STEP_TABLES_ROOTDIR"])
+            args.fits_summary_path = f'{tabledir}/data_collection_files/data_files/fits_cleaned_JWST_data.csv'
 
     # pandas reads the table at the path args.fits_summary_path and then returns it to the variable fits_summary
     print (f'Loading fits summary: {args.fits_summary_path}')
@@ -499,7 +516,12 @@ if __name__ == "__main__":
         all_output.append('fk5')
         
         #sn_rootdir = f'{args.datadir}/source_extractor/{sn_name}'
-        sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        if args.telescope == 'HST':
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        elif args.telescope == 'JWST':
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/JWST'
+        else:  # both
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload'
 
         ds9cmd = f'\ncd {sn_rootdir} \n ds9 -zscale '
 
@@ -514,8 +536,12 @@ if __name__ == "__main__":
         green_ellipse_list=[]
         for index in sn_ix:
 
-            if fits_summary.loc[index,"Telescope"]=='JWST':
-                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+            # Filter by telescope
+            if args.telescope == 'HST' and fits_summary.loc[index,"Telescope"] != 'HST':
+                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]} (only processing HST)')
+                continue
+            elif args.telescope == 'JWST' and fits_summary.loc[index,"Telescope"] != 'JWST':
+                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]} (only processing JWST)')
                 continue
 
             if fits_summary.loc[index,"Filter"]=='detection':
@@ -543,8 +569,12 @@ if __name__ == "__main__":
 
         for index in sn_ix:
 
-            if fits_summary.loc[index,"Telescope"]=='JWST':
-                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+            # Filter by telescope
+            if args.telescope == 'HST' and fits_summary.loc[index,"Telescope"] != 'HST':
+                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]} (only processing HST)')
+                continue
+            elif args.telescope == 'JWST' and fits_summary.loc[index,"Telescope"] != 'JWST':
+                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]} (only processing JWST)')
                 continue
 
             if fits_summary.loc[index,"Filter"]=='detection':
@@ -598,6 +628,9 @@ if __name__ == "__main__":
                 regionfilename = re.sub('\.fits$','.reg',fitsfilename[:-12]+'.fits')
             else:
                 regionfilename = re.sub('\.fits$','.reg',fitsfilename)
+            
+            # Define region file output directory
+            regionfilename_out = f"{args.out_dir}/{fits_summary.at[index, 'File_key']}_region_file.reg"
             
             if regionfilename==fitsfilename:
                 raise RuntimeError(f'Could not replace .fits with .reg in {fitsfilename}')
