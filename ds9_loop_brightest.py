@@ -192,7 +192,7 @@ def get_region_info2(table):
         #print (f'alpha_deg {alpha_deg}')
 
         # Pixel scale (arcsec/pixel)
-        pixscale = 3600.0 * np.sqrt(math.fabs((row['CD1_1']*row['CD2_2']) - row['CD1_2']*row['CD2_1']))
+        pixscale = 3600.0 * np.sqrt(math.fabs(row['CD1_1']*row['CD2_2'] - row['CD1_2']*row['CD2_1']))
         #pixscale = 3600.0 * np.sqrt(CD1_1*CD2_2 - CD1_2*CD2_1)
         table.loc[ix,'pixscale'] = pixscale
 

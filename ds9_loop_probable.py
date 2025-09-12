@@ -39,13 +39,30 @@ def define_args():
         help="List of supernova names to process."
     )
 
-    print('GGGGGG',tabledir)
+    #print('GGGGGG',tabledir)
+    parser.add_argument(
+        "--telescope",
+        type=str,
+        choices=['HST', 'JWST'],
+        default='HST',
+        help="Choose telescope data: HST or JWST (default=%(default)s)"
+    )
+    
     parser.add_argument(
         "--fits_summary_path", 
         type=str, 
-        default=f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv', 
-        help="Path to the FITS summary CSV file (default=%(default)s)"
+        help="Path to the FITS summary CSV file (if not provided, will use telescope-specific default)"
+        #default=f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv', 
+        
     )
+
+
+    # parser.add_argument(
+    #     "--fits_summary_path", 
+    #     type=str, 
+    #     default=f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv', 
+    #     help="Path to the FITS summary CSV file (default=%(default)s)"
+    # )
 
     parser.add_argument(
         "--unmatched_pantheon_path", 
@@ -141,7 +158,7 @@ def get_region_info2(table):
         cxx = row['CXX']
         cyy = row['CYY']
         cxy = row['CXY']
-
+        print(f'cxx={cxx}, cyy={cyy}, cxy={cxy}')
         # Skip rows with NaN values
         try:
             if pd.isna(cxx) or pd.isna(cyy) or pd.isna(cxy):
@@ -179,7 +196,7 @@ def get_region_info2(table):
         #print (f'alpha_deg {alpha_deg}')
 
         # Pixel scale (arcsec/pixel)
-        pixscale = 3600.0 * np.sqrt(math.fabs((row['CD1_1']*row['CD2_2']) - row['CD1_2']*row['CD2_1']))
+        pixscale = 3600.0 * np.sqrt(math.fabs(row['CD1_1']*row['CD2_2'] - row['CD1_2']*row['CD2_1']))
         #pixscale = 3600.0 * np.sqrt(CD1_1*CD2_2 - CD1_2*CD2_1)
         table.loc[ix,'pixscale'] = pixscale
 
@@ -439,6 +456,20 @@ if __name__ == "__main__":
     args = define_args()
     images_to_download=[]
 
+    # Set default fits_summary_path based on telescope choice if not provided
+    if args.fits_summary_path is None:
+        #Get tabledir from environment or use current directory (same logic as in define_args)
+        if 'MASS_STEP_TABLES_ROOTDIR' in os.environ:
+            tabledir = os.path.abspath(f'{os.environ["MASS_STEP_TABLES_ROOTDIR"]}')
+        else:
+            tabledir = '.'
+            
+        if args.telescope.upper() == 'HST':
+            args.fits_summary_path = f'{tabledir}/data_collection_files/data_files/fits_cleaned_HST_data.csv'
+        elif args.telescope.upper() == 'JWST':
+            args.fits_summary_path = f'{tabledir}/data_collection_files/data_files/fits_cleaned_JWST_data.csv'
+        else:
+            raise ValueError(f"Invalid telescope choice: {args.telescope}. Must be 'HST' or 'JWST'")
 
     # pandas reads the table at the path args.fits_summary_path and then returns it to the variable fits_summary
     print (f'Loading fits summary: {args.fits_summary_path}')
@@ -499,7 +530,13 @@ if __name__ == "__main__":
         all_output.append('fk5')
         
         #sn_rootdir = f'{args.datadir}/source_extractor/{sn_name}'
-        sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        #sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        if args.telescope == 'HST':
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/HST'
+        elif args.telescope == 'JWST':
+            sn_rootdir = f'{args.datadir}/pantheon_data_folder/{sn_name}/mastDownload/JWST'
+        else:
+            raise ValueError(f"Invalid telescope choice: {args.telescope}. Must be 'HST' or 'JWST'")
 
         ds9cmd = f'\ncd {sn_rootdir} \n ds9 -zscale '
 
@@ -514,9 +551,9 @@ if __name__ == "__main__":
         green_ellipse_list=[]
         for index in sn_ix:
 
-            if fits_summary.loc[index,"Telescope"]=='JWST':
-                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
-                continue
+            # if fits_summary.loc[index,"Telescope"]=='JWST':
+            #     print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+            #     continue
 
             if fits_summary.loc[index,"Filter"]=='detection':
                 print(f'WARNING! skipping since filter={fits_summary.loc[index,"Filter"]}')
@@ -543,9 +580,9 @@ if __name__ == "__main__":
 
         for index in sn_ix:
 
-            if fits_summary.loc[index,"Telescope"]=='JWST':
-                print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
-                continue
+            # if fits_summary.loc[index,"Telescope"]=='JWST':
+            #     print(f'WARNING! skipping since telescope={fits_summary.loc[index,"Telescope"]}')
+            #     continue
 
             if fits_summary.loc[index,"Filter"]=='detection':
                 print(f'WARNING! skipping since filter={fits_summary.loc[index,"Filter"]}')
@@ -602,10 +639,17 @@ if __name__ == "__main__":
             if regionfilename==fitsfilename:
                 raise RuntimeError(f'Could not replace .fits with .reg in {fitsfilename}')
             
+            # Save region file to output directory instead of original data directory
+            (path1,fname1) = os.path.split(fits_summary.at[index, "filename"])
+            (path2,subdir1) = os.path.split(path1)
+            region_basename = os.path.basename(regionfilename)
+            regionfilename_out = f"{args.out_dir}/{region_basename}"
+            
             #filepath_regionfile = f"{args.out_dir}/{fits_summary.at[index, 'File_key']}_region_file.reg"
 
             print('fitsfilename',fitsfilename)
-            print('regionfilename',regionfilename)
+            print('regionfilename (original data dir)',regionfilename)
+            print('regionfilename (output dir)',regionfilename_out)
 
             if not os.path.isfile(fitsfilename):
                 print(f'WARNING!!!!! fitsfile {fitsfilename} does not exist!!!')
@@ -613,7 +657,7 @@ if __name__ == "__main__":
                 continue
 
             relative_fitsfilename = os.path.relpath(fitsfilename, start=sn_rootdir)
-            relative_regionfilename = os.path.relpath(regionfilename, start=sn_rootdir)
+            relative_regionfilename = os.path.relpath(regionfilename_out, start=sn_rootdir)
 
             ds9cmd += f' {relative_fitsfilename} -regionfile {relative_regionfilename}'
             print(ds9cmd)
