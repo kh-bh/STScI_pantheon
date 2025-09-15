@@ -180,7 +180,8 @@ def get_sdss_good_coordinates_all(name, RA, Dec, search_radius=0.1):
         
         # Use SDSS cone search
         result = SDSS.query_region(coord, radius=search_radius*u.degree, 
-                                  spectro=True, data_release=16, photoobj_fields=[ 'objID', 'type', 'flags', 'clean', 'score', 'specObjID', 'u', 'err_u', 'g', 'err_g', 'r', 'err_r', 'i', 'err_i', 'z', 'err_z', 'ra', 'dec'])
+                                  data_release=16, photoobj_fields=[ 'objID', 'type', 'flags', 'clean', 'score', 'specObjID', 'u', 'err_u', 'g', 'err_g', 'r', 'err_r', 'i', 'err_i', 'z', 'err_z', 'ra', 'dec'])
+        result = SDSS.query_region(coord, radius=search_radius*u.degree, data_release=16)
         # result = SDSS.query_region(coord, radius=search_radius*u.degree, 
         #                          spectro=True, data_release=16)
         
@@ -226,7 +227,9 @@ def get_sdss_good_coordinates_all(name, RA, Dec, search_radius=0.1):
                 print(f"Target coordinates: RA={RA:.6f}°, Dec={Dec:.6f}°")
                 print(f"Search radius: {search_radius}° ({search_radius*60:.1f} arcminutes)")
                 print(f"Galaxies found: {len(result)}")
-                if len(result) > 0:
+                
+                if len(result) > 3:
+                    result = result[:3] #take the top 3 galaxies from the angular distance
                     print(f"Closest galaxy: {result['angular_distance_arcsec'][0]:.2f} arcseconds away")
                     print(f"Farthest galaxy: {result['angular_distance_arcsec'][-1]:.2f} arcseconds away")
                 
@@ -728,9 +731,9 @@ if __name__ == "__main__":
         #read_ir_data(filtered_table)
 
         # Run example when script is executed directly
-        table1 = pd.read_csv('data_collection_files/data_files/reduced_table_sn_in_images.csv')
+        table1 = pd.read_csv('data_collection_files/data_files/reduced_table_sn_in_images_JWST_new.csv')
         #reneme the SNID_x column to SNID
-        table1 = table1.rename(columns={'SNID_x': 'SNID'})
+        table1 = table1.rename(columns={'SNID': 'SNID'})
         table2 = pd.read_csv('data_collection_files/data_files/fits_summary_combined.csv')
         
         # Use inner join to only get SNIDs that exist in both tables
